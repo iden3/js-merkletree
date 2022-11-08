@@ -1,0 +1,79 @@
+{
+  "name": "@iden3/js-merkletree",
+  "version": "0.0.0",
+  "description": "javascript sparse merkle tree library",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/types/index.d.ts",
+        "module": "./dist/esm/index.js",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/types/index.d.ts",
+        "module": "./dist/cjs/index.js",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "types": "./dist/cjs/types/index.d.ts",
+  "main": "index.js",
+  "module": "./dist/esm/index.mjs",
+  "source": "./src/index.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "keywords": ["js merkletree", "sparse merkletree", "iden3"],
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iden3/js-merkletree.git"
+  },
+  "author": "Iden3 Core team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iden3/js-merkletree-core/issues"
+  },
+  "homepage": "https://github.com/iden3/js-merkletree#readme",
+  "scripts": {
+    "lint": "eslint --fix --ext .js,.ts src/**",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig/tsconfig.cjs.json && webpack --config webpack.esm.config.js --mode production && webpack --mode production",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register './tests/**/*.test.ts'",
+    "format": "prettier --config .prettierrc './**/*.ts' --write"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^10.0.0",
+    "@types/ramda": "^0.28.18",
+    "@types/node": "^14.11.2",
+    "assert": "^2.0.0",
+    "buffer": "^6.0.3",
+    "chai": "^4.3.6",
+    "gts": "^3.1.1",
+    "mocha": "^10.1.0",
+    "process": "^0.11.10",
+    "ts-loader": "^9.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "webpack-cli": "^4.10.0",
+    "stream-browserify": "^3.0.0",
+    "webpack": "^5.74.0",
+    "webpack-merge": "^5.8.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "crypto-browserify": "^3.12.0",
+    "os-browserify": "^0.3.0"
+  },
+  "dependencies": {
+    "big-integer": "^1.6.51",
+    "circomlibjs": "^0.1.7",
+    "ramda": "^0.28.0"
+  }
+}
