@@ -1,4 +1,3 @@
-import bigInt, { BigInteger } from 'big-integer';
 import { Bytes } from '../../types';
 import { HASH_BYTES_LENGTH } from '../../constants';
 import { checkBigIntInField } from './crypto';
@@ -31,16 +30,20 @@ export const bytesToBitArray = (bytes: Bytes) => {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;
   }
 
-  const bitArr: Array<BigInteger> = [];
+  const bitArr: Array<BigInt> = [];
 
   bytes.forEach((byte) => {
     const bitString = byteTo8BitString(byte);
     bitString.split('').forEach((bit) => {
-      bitArr.push(bigInt(bit, 2));
+      bitArr.push(BigInt(bit));
     });
   });
 
   return bitArr;
+};
+
+export const bytes2BinaryString = (bytes: Bytes) => {
+  return '0b' + bytesToBitArray(bytes).join('');
 };
 
 const byteTo8BitString = (num: number) => {
@@ -90,7 +93,7 @@ export const newBigIntFromBytes = (bytes: Bytes) => {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;
   }
 
-  const bigNum = bigInt.fromArray(bytesToBitArray(bytes), 2);
+  const bigNum = BigInt(bytes2BinaryString(bytes));
   if (!checkBigIntInField(bigNum)) {
     throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
   }

@@ -1,7 +1,12 @@
-import bigInt from 'big-integer';
 import { clone } from 'ramda';
 import { HASH_BYTES_LENGTH } from '../../constants/index';
-import { bytesEqual, bytesToBitArray, swapEndianness, bytes2Hex } from '../utils/index';
+import {
+  bytesEqual,
+  bytesToBitArray,
+  swapEndianness,
+  bytes2Hex,
+  bytes2BinaryString
+} from '../utils/index';
 import { Bytes, IHash } from '../../types';
 import { bigIntToUINT8Array } from '../utils/bigint';
 
@@ -42,8 +47,8 @@ export default class Hash implements IHash {
     return bytesEqual(this.value, hash.value);
   }
 
-  BigInt(): bigInt.BigInteger {
+  BigInt(): bigint {
     const bytes = swapEndianness(this.value);
-    return bigInt.fromArray(bytesToBitArray(bytes), 2);
+    return BigInt(bytes2BinaryString(bytes));
   }
 }

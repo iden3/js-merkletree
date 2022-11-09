@@ -26,7 +26,6 @@ import {
   Path,
   Siblings
 } from '../../types/merkletree';
-import bigInt, { BigInteger } from 'big-integer';
 import { Entry } from '../../types/entry';
 import { checkBigIntInField } from '../utils/crypto';
 import { CircomProcessorProof, CircomVerifierProof } from './circom';
@@ -62,7 +61,7 @@ export default class Merkletree {
     return this.#maxLevel;
   }
 
-  async add(k: bigInt.BigInteger, v: bigInt.BigInteger) {
+  async add(k: bigint, v: bigint) {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -214,7 +213,7 @@ export default class Merkletree {
     }
   }
 
-  async get(k: bigInt.BigInteger) {
+  async get(k: bigint) {
     const kHash = newHashFromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
@@ -230,8 +229,8 @@ export default class Merkletree {
       switch (n.type) {
         case NODE_TYPE_EMPTY:
           return {
-            key: bigInt(0),
-            value: bigInt(0),
+            key: BigInt('0'),
+            value: BigInt('0'),
             siblings
           };
         case NODE_TYPE_LEAF:
@@ -264,7 +263,7 @@ export default class Merkletree {
     throw ErrReachedMaxLevel;
   }
 
-  async update(k: bigInt.BigInteger, v: bigInt.BigInteger) {
+  async update(k: bigint, v: bigint) {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -365,7 +364,7 @@ export default class Merkletree {
   // import them in a new MerkleTree in a new database (using
   // mt.ImportDumpedLeafs), but this will loose all the Root history of the
   // MerkleTree
-  async delete(k: bigInt.BigInteger) {
+  async delete(k: bigint) {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -475,13 +474,13 @@ export default class Merkletree {
     await this.walk(rootKey, f);
   }
 
-  async generateCircomVerifierProof(k: bigInt.BigInteger, rootKey: Hash) {
+  async generateCircomVerifierProof(k: bigint, rootKey: Hash) {
     const cp = await this.generateSCVerifierProof(k, rootKey);
     cp.siblings = circomSiblingsFromSiblings(cp.siblings, this.maxLevels);
     return cp;
   }
 
-  async generateSCVerifierProof(k: bigInt.BigInteger, rootKey: Hash): Promise<CircomVerifierProof> {
+  async generateSCVerifierProof(k: bigint, rootKey: Hash): Promise<CircomVerifierProof> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = this.root;
     }
@@ -509,10 +508,7 @@ export default class Merkletree {
     return cp;
   }
 
-  async generateProof(
-    k: bigInt.BigInteger,
-    rootKey: Hash
-  ): Promise<{ proof: Proof; value: bigInt.BigInteger }> {
+  async generateProof(k: bigint, rootKey: Hash): Promise<{ proof: Proof; value: bigint }> {
     const p = new Proof();
     let siblingKey: Hash;
 
@@ -530,7 +526,7 @@ export default class Merkletree {
       }
       switch (n.type) {
         case NODE_TYPE_EMPTY:
-          return { proof: p, value: bigInt(0) };
+          return { proof: p, value: BigInt('0') };
         case NODE_TYPE_LEAF:
           if (bytesEqual(kHash.value, (n as NodeLeaf).entry[0].value)) {
             p.existence = true;
@@ -562,12 +558,12 @@ export default class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async addAndGetCircomProof(k: bigInt.BigInteger, v: bigInt.BigInteger) {
+  async addAndGetCircomProof(k: bigint, v: bigint) {
     const cp = new CircomProcessorProof();
     cp.fnc = 2;
     cp.oldRoot = this.root;
-    let key = bigInt(0);
-    let value = bigInt(0);
+    let key = BigInt('0');
+    let value = BigInt('0');
     let siblings: Siblings = [];
     try {
       const res = await this.get(k);
