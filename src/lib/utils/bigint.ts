@@ -1,9 +1,17 @@
-import { BigInteger } from 'big-integer';
 import { splitEvery } from 'ramda';
 import { HASH_BYTES_LENGTH, HASH_SIZE_LENGTH_IN_BITS } from '../../constants';
 import { Bytes } from '../../types';
 
-export const bigIntToUINT8Array = (bigNum: BigInteger): Bytes => {
+export const bigint2Array = (bigNum: bigint, radix?: number) => {
+  return bigNum
+    .toString(radix ? radix : 10)
+    .split('')
+    .map((n) => {
+      return parseInt(n);
+    });
+};
+
+export const bigIntToUINT8Array = (bigNum: bigint): Bytes => {
   const buffer = new ArrayBuffer(HASH_BYTES_LENGTH);
   const bytes = new Uint8Array(buffer);
 
@@ -11,7 +19,7 @@ export const bigIntToUINT8Array = (bigNum: BigInteger): Bytes => {
     return 0;
   });
 
-  const bigNumToBinaryArray = bigNum.toArray(2).value;
+  const bigNumToBinaryArray = bigint2Array(bigNum, 2);
 
   let startIDX = bArr.length - bigNumToBinaryArray.length;
   for (let idx = startIDX; idx < bArr.length; idx++) {

@@ -2,7 +2,7 @@ import { NodeAux, Siblings } from '../../types/merkletree';
 import Proof from '../merkletree/proof';
 import { bytesEqual, setBitBigEndian, testBitBigEndian } from './bytes';
 import { ZERO_HASH } from '../../constants';
-import bigInt from 'big-integer';
+
 import Hash from '../hash/hash';
 import { newHashFromBigInt } from './hash';
 import { leafKey } from './node';
@@ -44,12 +44,7 @@ export const siblignsFroomProof = (proof: Proof) => {
   return siblings;
 };
 
-export const verifyProof = async (
-  rootKey: Hash,
-  proof: Proof,
-  k: bigInt.BigInteger,
-  v: bigInt.BigInteger
-) => {
+export const verifyProof = async (rootKey: Hash, proof: Proof, k: bigint, v: bigint) => {
   try {
     const rFromProof = await rootFromProof(proof, k, v);
     return bytesEqual(rootKey.value, rFromProof.value);
@@ -61,7 +56,7 @@ export const verifyProof = async (
   }
 };
 
-export const rootFromProof = async (proof: Proof, k: bigInt.BigInteger, v: bigInt.BigInteger) => {
+export const rootFromProof = async (proof: Proof, k: bigint, v: bigint) => {
   const kHash = newHashFromBigInt(k);
   const vHash = newHashFromBigInt(v);
 

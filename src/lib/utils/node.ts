@@ -2,13 +2,13 @@
 // entry of the leaf.
 import Hash from '../hash/hash';
 import { hashElemsKey } from './poseidon';
-import bigInt from 'big-integer';
+
 import { NODE_VALUE_BYTE_ARR_LENGTH } from '../../constants';
 import { bigIntToUINT8Array } from './bigint';
 import { NodeType } from '../../types';
 
 export const leafKey = async (k: Hash, v: Hash): Promise<Hash> => {
-  return await hashElemsKey(bigInt.one, [k.BigInt(), v.BigInt()]);
+  return await hashElemsKey(BigInt(1), [k.BigInt(), v.BigInt()]);
 };
 
 export const nodeValue = (type: NodeType, a: Hash, b: Hash) => {
