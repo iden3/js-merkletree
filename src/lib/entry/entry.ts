@@ -3,6 +3,8 @@ import Hash from '../hash/hash';
 import { ZERO_HASH } from '../../constants/index';
 import { clone } from 'ramda';
 import { elemBytesToBigInts, hashElems } from '../../lib/utils';
+import { ElemBytes } from 'lib';
+import { Bytes } from 'types';
 
 export class Entry {
   #data: Data;
@@ -15,11 +17,11 @@ export class Entry {
     this.#hValue = ZERO_HASH;
   }
 
-  get data() {
+  get data(): Data {
     return this.#data;
   }
 
-  get index() {
+  get index(): Array<ElemBytes> {
     return this.#data.value.slice(0, 4);
   }
 
@@ -27,21 +29,21 @@ export class Entry {
     return this.#data.value.slice(4, 8);
   }
 
-  async hIndex() {
+  async hIndex(): Promise<Hash> {
     if (this.#hIndex === ZERO_HASH) {
       return await hashElems(elemBytesToBigInts(this.index));
     }
     return this.#hIndex;
   }
 
-  async hValue() {
+  async hValue(): Promise<Hash> {
     if (this.#hValue === ZERO_HASH) {
       return await hashElems(elemBytesToBigInts(this.value));
     }
     return this.#hValue;
   }
 
-  hiHv() {
+  hiHv(): Promise<{ hi: Hash; hv: Hash }> {
     return (async () => {
       const hi = await this.hIndex();
       const hv = await this.hValue();
@@ -49,15 +51,15 @@ export class Entry {
     })();
   }
 
-  bytes() {
+  bytes(): Array<ElemBytes> {
     return this.#data.value;
   }
 
-  equal(e2: Entry) {
+  equal(e2: Entry): boolean {
     return this.#data.equal(e2.data);
   }
 
-  clone() {
+  clone(): Entry {
     return new Entry(clone(this.#data));
   }
 }

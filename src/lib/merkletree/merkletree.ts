@@ -9,7 +9,7 @@ import {
   ZERO_HASH
 } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import { clone, defaultTo } from 'ramda';
+import { clone, defaultTo, Ord } from 'ramda';
 import {
   bytesEqual,
   checkEntryInField,
@@ -53,15 +53,15 @@ export default class Merkletree {
     this.#root = this.#db.getRoot();
   }
 
-  get root() {
+  get root(): Hash {
     return this.#root;
   }
 
-  get maxLevels() {
+  get maxLevels(): number {
     return this.#maxLevel;
   }
 
-  async add(k: bigint, v: bigint) {
+  async add(k: bigint, v: bigint): Promise<void> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -75,10 +75,10 @@ export default class Merkletree {
     const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
     this.#root = newRootKey;
 
-    return await this.#db.setRoot(this.root);
+    await this.#db.setRoot(this.root);
   }
 
-  async updateNode(n: Node) {
+  async updateNode(n: Node): Promise<Hash> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -93,7 +93,7 @@ export default class Merkletree {
     return k;
   }
 
-  async addNode(n: Node) {
+  async addNode(n: Node): Promise<Hash> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -110,7 +110,7 @@ export default class Merkletree {
     return k;
   }
 
-  async addEntry(e: Entry) {
+  async addEntry(e: Entry): Promise<void> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -136,7 +136,7 @@ export default class Merkletree {
     lvl: number,
     pathNewLeaf: Array<boolean>,
     pathOldLeaf: Array<boolean>
-  ) {
+  ): Promise<Hash> {
     if (lvl > this.#maxLevel - 2) {
       throw ErrReachedMaxLevel;
     }
@@ -167,7 +167,7 @@ export default class Merkletree {
     return await this.addNode(newNodeMiddle);
   }
 
-  async addLeaf(newLeaf: NodeLeaf, key: Hash, lvl: number, path: Array<boolean>) {
+  async addLeaf(newLeaf: NodeLeaf, key: Hash, lvl: number, path: Array<boolean>): Promise<Hash> {
     let nextKey: Hash;
 
     if (lvl > this.#maxLevel - 1) {
@@ -213,7 +213,7 @@ export default class Merkletree {
     }
   }
 
-  async get(k: bigint) {
+  async get(k: bigint): Promise<{ key: bigint; value: bigint; siblings: Siblings }> {
     const kHash = newHashFromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
@@ -263,7 +263,7 @@ export default class Merkletree {
     throw ErrReachedMaxLevel;
   }
 
-  async update(k: bigint, v: bigint) {
+  async update(k: bigint, v: bigint): Promise<CircomProcessorProof> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -332,14 +332,18 @@ export default class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async getNode(k: Hash) {
+  async getNode(k: Hash): Promise<Node | NodeEmpty> {
     if (bytesEqual(k.value, ZERO_HASH.value)) {
       return new NodeEmpty();
     }
     return await this.#db.get(k.value);
   }
 
-  async recalculatePathUntilRoot(path: Array<boolean>, node: Node, siblings: Siblings) {
+  async recalculatePathUntilRoot(
+    path: Array<boolean>,
+    node: Node,
+    siblings: Siblings
+  ): Promise<Hash> {
     for (let i = siblings.length - 1; i >= 0; i -= 1) {
       const nodeKey = await node.getKey();
       if (path[i]) {
@@ -364,7 +368,7 @@ export default class Merkletree {
   // import them in a new MerkleTree in a new database (using
   // mt.ImportDumpedLeafs), but this will loose all the Root history of the
   // MerkleTree
-  async delete(k: bigint) {
+  async delete(k: bigint): Promise<void> {
     if (!this.#writable) {
       throw ErrNotWritable;
     }
@@ -406,7 +410,7 @@ export default class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings) {
+  async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings): Promise<void> {
     if (siblings.length === 0) {
       this.#root = ZERO_HASH;
       this.#db.setRoot(this.root);
@@ -444,7 +448,7 @@ export default class Merkletree {
     }
   }
 
-  async recWalk(key: Hash, f: (n: Node) => Promise<void>) {
+  async recWalk(key: Hash, f: (n: Node) => Promise<void>): Promise<void> {
     const n = await this.getNode(key);
     if (typeof n === 'undefined') {
       throw ErrNotFound;
@@ -467,14 +471,14 @@ export default class Merkletree {
     }
   }
 
-  async walk(rootKey: Hash, f: (n: Node) => Promise<void>) {
+  async walk(rootKey: Hash, f: (n: Node) => Promise<void>): Promise<void> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = this.root;
     }
     await this.walk(rootKey, f);
   }
 
-  async generateCircomVerifierProof(k: bigint, rootKey: Hash) {
+  async generateCircomVerifierProof(k: bigint, rootKey: Hash): Promise<CircomVerifierProof> {
     const cp = await this.generateSCVerifierProof(k, rootKey);
     cp.siblings = circomSiblingsFromSiblings(cp.siblings, this.maxLevels);
     return cp;
@@ -558,7 +562,7 @@ export default class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async addAndGetCircomProof(k: bigint, v: bigint) {
+  async addAndGetCircomProof(k: bigint, v: bigint): Promise<CircomProcessorProof> {
     const cp = new CircomProcessorProof();
     cp.fnc = 2;
     cp.oldRoot = this.root;
@@ -598,7 +602,7 @@ export default class Merkletree {
   }
 
   // NOTE: for now it only prints to console, will be updated in future
-  async graphViz(rootKey: Hash) {
+  async graphViz(rootKey: Hash): Promise<void> {
     let cnt = 0;
 
     await this.walk(rootKey, async (n: Node) => {
@@ -634,7 +638,7 @@ export default class Merkletree {
     console.log(`}\n`);
   }
 
-  async printGraphViz(rootKey: Hash) {
+  async printGraphViz(rootKey: Hash): Promise<void> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = this.root;
     }

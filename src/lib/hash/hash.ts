@@ -1,12 +1,6 @@
 import { clone } from 'ramda';
 import { HASH_BYTES_LENGTH } from '../../constants/index';
-import {
-  bytesEqual,
-  bytesToBitArray,
-  swapEndianness,
-  bytes2Hex,
-  bytes2BinaryString
-} from '../utils/index';
+import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
 import { Bytes, IHash } from '../../types';
 import { bigIntToUINT8Array } from '../utils/bigint';
 

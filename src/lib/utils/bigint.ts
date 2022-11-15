@@ -2,7 +2,7 @@ import { splitEvery } from 'ramda';
 import { HASH_BYTES_LENGTH, HASH_SIZE_LENGTH_IN_BITS } from '../../constants';
 import { Bytes } from '../../types';
 
-export const bigint2Array = (bigNum: bigint, radix?: number) => {
+export const bigint2Array = (bigNum: bigint, radix?: number): Array<number> => {
   return bigNum
     .toString(radix ? radix : 10)
     .split('')

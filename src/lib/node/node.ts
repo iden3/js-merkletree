@@ -1,4 +1,4 @@
-import { IHash, Node, NodeType } from '../../types';
+import { Bytes, IHash, Node, NodeType } from '../../types';
 import Hash from '../hash/hash';
 import {
   EMPTY_NODE_STRING,
@@ -24,18 +24,18 @@ export class NodeLeaf implements Node {
     this.#key = ZERO_HASH;
   }
 
-  async getKey() {
+  async getKey(): Promise<Hash> {
     if (this.#key === ZERO_HASH) {
       return await leafKey(this.entry[0], this.entry[1]);
     }
     return this.#key;
   }
 
-  get value() {
+  get value(): Bytes {
     return nodeValue(this.type, this.entry[0], this.entry[1]);
   }
 
-  get string() {
+  get string(): string {
     return `Leaf I:${this.entry[0]} D:${this.entry[1]}`;
   }
 }
@@ -53,18 +53,18 @@ export class NodeMiddle implements Node {
     this.#key = ZERO_HASH;
   }
 
-  async getKey() {
+  async getKey(): Promise<Hash> {
     if (this.#key === ZERO_HASH) {
       return hashElems([this.childL.BigInt(), this.childR.BigInt()]);
     }
     return this.#key;
   }
 
-  get value() {
+  get value(): Bytes {
     return nodeValue(this.type, this.childL, this.childR);
   }
 
-  get string() {
+  get string(): string {
     return `Middle L:${this.childL} R:${this.childR}`;
   }
 }
@@ -78,15 +78,15 @@ export class NodeEmpty implements Node {
     this.#key = ZERO_HASH;
   }
 
-  async getKey() {
+  async getKey(): Promise<Hash> {
     return ZERO_HASH;
   }
 
-  get value() {
+  get value(): Bytes {
     return EMPTY_NODE_VALUE;
   }
 
-  get string() {
+  get string(): string {
     return EMPTY_NODE_STRING;
   }
 }

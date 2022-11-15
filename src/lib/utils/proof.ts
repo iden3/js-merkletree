@@ -28,7 +28,7 @@ const newProofFromData = (existence: boolean, allSiblings: Siblings, nodeAux: No
   return p;
 };
 
-export const siblignsFroomProof = (proof: Proof) => {
+export const siblignsFroomProof = (proof: Proof): Siblings => {
   let sibIdx = 0;
   const siblings: Siblings = [];
 
@@ -44,7 +44,12 @@ export const siblignsFroomProof = (proof: Proof) => {
   return siblings;
 };
 
-export const verifyProof = async (rootKey: Hash, proof: Proof, k: bigint, v: bigint) => {
+export const verifyProof = async (
+  rootKey: Hash,
+  proof: Proof,
+  k: bigint,
+  v: bigint
+): Promise<boolean> => {
   try {
     const rFromProof = await rootFromProof(proof, k, v);
     return bytesEqual(rootKey.value, rFromProof.value);
@@ -56,7 +61,7 @@ export const verifyProof = async (rootKey: Hash, proof: Proof, k: bigint, v: big
   }
 };
 
-export const rootFromProof = async (proof: Proof, k: bigint, v: bigint) => {
+export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise<Hash> => {
   const kHash = newHashFromBigInt(k);
   const vHash = newHashFromBigInt(v);
 

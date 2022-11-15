@@ -26,7 +26,7 @@ export default class Proof {
     this.notEmpties = new Uint8Array(arrBuff);
   }
 
-  bytes() {
+  bytes(): Bytes {
     let bsLen = PROOF_FLAG_LEN + this.notEmpties.length + ELEM_BYTES_LEN * this.siblings.length;
 
     if (typeof this.nodeAux !== 'undefined') {
@@ -52,7 +52,7 @@ export default class Proof {
     return bs;
   }
 
-  async allSiblings() {
+  async allSiblings(): Promise<Siblings> {
     return siblignsFroomProof(this);
   }
 }

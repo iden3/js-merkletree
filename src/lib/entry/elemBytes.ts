@@ -10,7 +10,7 @@ export class ElemBytes {
     this.#bytes = new Uint8Array(ELEM_BYTES_LEN);
   }
 
-  get value() {
+  get value(): Bytes {
     return this.#bytes;
   }
 
@@ -18,11 +18,11 @@ export class ElemBytes {
     this.#bytes = b;
   }
 
-  bigInt() {
+  bigInt(): bigint {
     return newBigIntFromBytes(swapEndianness(this.#bytes));
   }
 
-  string() {
+  string(): string {
     const hexStr = bytes2Hex(this.#bytes.slice(0, 4));
     return `${hexStr}...`;
   }

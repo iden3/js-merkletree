@@ -5,7 +5,7 @@ import { Bytes } from '../../types';
 import { Data } from '../entry/data';
 import { DATA_LEN, DATA_LEN_BYTES, ELEM_BYTES_LEN } from '../../constants';
 
-export const elemBytesToBigInts = (es: Array<ElemBytes>) => {
+export const elemBytesToBigInts = (es: Array<ElemBytes>): Array<bigint> => {
   const bigInts = es.map((e) => {
     return e.bigInt();
   });
@@ -13,7 +13,7 @@ export const elemBytesToBigInts = (es: Array<ElemBytes>) => {
   return bigInts;
 };
 
-export const checkEntryInField = (e: Entry) => {
+export const checkEntryInField = (e: Entry): boolean => {
   const bigInts = elemBytesToBigInts(e.data.value);
   let flag = true;
 
