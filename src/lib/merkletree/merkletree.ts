@@ -598,6 +598,7 @@ export default class Merkletree {
         case NODE_TYPE_EMPTY:
           break;
         case NODE_TYPE_LEAF:
+          // eslint-disable-next-line no-console
           console.log(`"${k.String()}" [style=filled]`);
           break;
         case NODE_TYPE_MIDDLE:
@@ -611,7 +612,9 @@ export default class Merkletree {
               cnt += 1;
             }
           });
+          // eslint-disable-next-line no-console
           console.log(`"${k.String()}" -> {"${lr[1]}"}`);
+          // eslint-disable-next-line no-console
           console.log(emptyNodes);
           break;
         default:
@@ -619,6 +622,7 @@ export default class Merkletree {
       }
     });
 
+    // eslint-disable-next-line no-console
     console.log(`}\n`);
   }
 
@@ -626,10 +630,12 @@ export default class Merkletree {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = this.root;
     }
+    // eslint-disable-next-line no-console
     console.log(
       `--------\nGraphViz of the MerkleTree with RootKey ${rootKey.BigInt().toString(10)}\n`
     );
     await this.graphViz(ZERO_HASH);
+    // eslint-disable-next-line no-console
     console.log(
       `End of GraphViz of the MerkleTree with RootKey ${rootKey.BigInt().toString(10)}\n--------\n`
     );
