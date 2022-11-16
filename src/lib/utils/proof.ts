@@ -1,6 +1,6 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
 import Proof from '../merkletree/proof';
-import { bytesEqual, setBitBigEndian, testBitBigEndian } from './bytes';
+import { bytesEqual, testBitBigEndian } from './bytes';
 import { ZERO_HASH } from '../../constants';
 
 import Hash from '../hash/hash';
@@ -9,24 +9,6 @@ import { leafKey } from './node';
 import { getPath } from './merkletree';
 import { NodeMiddle } from '../node/node';
 import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
-
-const newProofFromData = (existence: boolean, allSiblings: Siblings, nodeAux: NodeAux) => {
-  const p = new Proof();
-  p.existence = existence;
-  p.nodeAux = nodeAux;
-  const siblings: Siblings = [];
-  p.depth = allSiblings.length;
-
-  allSiblings.forEach((sibling, lvl) => {
-    if (!bytesEqual(sibling.value, ZERO_HASH.value)) {
-      setBitBigEndian(p.notEmpties, lvl);
-      siblings.push(sibling);
-    }
-  });
-
-  p.siblings = siblings;
-  return p;
-};
 
 export const siblignsFroomProof = (proof: Proof): Siblings => {
   let sibIdx = 0;

@@ -1,7 +1,7 @@
 // in Memory Database implementation
 
 import { Bytes, Node } from '../../types';
-import { KV, KVMap, Storage } from '../../types/storage';
+import { Storage } from '../../types/storage';
 import Hash from '../hash/hash';
 import { ZERO_HASH } from '../../constants';
 import { clone } from 'ramda';

@@ -1,31 +1,18 @@
 import { Storage } from '../../types/storage';
 import Hash from '../hash/hash';
-import { Bytes, Node } from '../../types';
-import {
-  EMPTY_NODE_VALUE,
-  NODE_TYPE_EMPTY,
-  NODE_TYPE_LEAF,
-  NODE_TYPE_MIDDLE,
-  ZERO_HASH
-} from '../../constants';
+import { Node } from '../../types';
+import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import { clone, defaultTo, Ord } from 'ramda';
+import { clone } from 'ramda';
 import {
   bytesEqual,
   checkEntryInField,
   circomSiblingsFromSiblings,
   getPath,
   newHashFromBigInt,
-  newHashFromString,
-  setBitBigEndian,
-  testBit
+  setBitBigEndian
 } from '../utils';
-import {
-  ICircomProcessorProof,
-  ICircomVerifierProof,
-  Path,
-  Siblings
-} from '../../types/merkletree';
+import { Siblings } from '../../types/merkletree';
 import { Entry } from '../../types/entry';
 import { checkBigIntInField } from '../utils/crypto';
 import { CircomProcessorProof, CircomVerifierProof } from './circom';
@@ -33,7 +20,6 @@ import {
   ErrEntryIndexAlreadyExists,
   ErrInvalidNodeFound,
   ErrKeyNotFound,
-  ErrNodeKeyAlreadyExists,
   ErrNotFound,
   ErrNotWritable,
   ErrReachedMaxLevel
@@ -168,8 +154,6 @@ export default class Merkletree {
   }
 
   async addLeaf(newLeaf: NodeLeaf, key: Hash, lvl: number, path: Array<boolean>): Promise<Hash> {
-    let nextKey: Hash;
-
     if (lvl > this.#maxLevel - 1) {
       throw ErrReachedMaxLevel;
     }

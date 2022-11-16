@@ -1,4 +1,4 @@
-import { Bytes, IHash, Node, NodeType } from '../../types';
+import { Bytes, Node, NodeType } from '../../types';
 import Hash from '../hash/hash';
 import {
   EMPTY_NODE_STRING,
@@ -6,7 +6,6 @@ import {
   NODE_TYPE_EMPTY,
   NODE_TYPE_LEAF,
   NODE_TYPE_MIDDLE,
-  NODE_VALUE_BYTE_ARR_LENGTH,
   ZERO_HASH
 } from '../../constants';
 import { leafKey, nodeValue } from '../utils/node';

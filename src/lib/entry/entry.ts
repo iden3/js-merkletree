@@ -4,7 +4,6 @@ import { ZERO_HASH } from '../../constants/index';
 import { clone } from 'ramda';
 import { elemBytesToBigInts, hashElems } from '../../lib/utils';
 import { ElemBytes } from 'lib';
-import { Bytes } from 'types';
 
 export class Entry {
   #data: Data;
@@ -25,7 +24,7 @@ export class Entry {
     return this.#data.value.slice(0, 4);
   }
 
-  get value() {
+  get value(): Array<ElemBytes> {
     return this.#data.value.slice(4, 8);
   }
 

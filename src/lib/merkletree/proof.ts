@@ -1,12 +1,6 @@
 import { Bytes } from '../../types';
 import { NodeAux, Siblings } from '../../types/merkletree';
-import {
-  ELEM_BYTES_LEN,
-  HASH_BYTES_LENGTH,
-  NOT_EMPTIES_LEN,
-  PROOF_FLAG_LEN,
-  ZERO_HASH
-} from '../../constants';
+import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
 import { siblignsFroomProof, siblings2Bytes } from '../utils';
 
 export default class Proof {

@@ -105,12 +105,6 @@ export const str2Bytes = (str: string): Bytes => {
   return new Uint8Array(str2ArrBuf(str));
 };
 
-const arrBuf2Str = (buf: ArrayBuffer): string => {
-  const uInt16Arr = new Uint16Array(buf);
-  const arr = Array.from(uInt16Arr);
-  return String.fromCharCode.apply(null, arr);
-};
-
 const str2ArrBuf = (str: string): ArrayBuffer => {
   const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
   const bufView = new Uint16Array(buf);

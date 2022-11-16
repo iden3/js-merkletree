@@ -2,7 +2,6 @@ import { clone } from 'ramda';
 import { HASH_BYTES_LENGTH } from '../../constants/index';
 import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
 import { Bytes, IHash } from '../../types';
-import { bigIntToUINT8Array } from '../utils/bigint';
 
 export default class Hash implements IHash {
   // little endian
@@ -33,7 +32,6 @@ export default class Hash implements IHash {
   }
 
   Hex(): string {
-    const b = swapEndianness(bigIntToUINT8Array(this.BigInt()));
     return bytes2Hex(this.bytes);
   }
 
