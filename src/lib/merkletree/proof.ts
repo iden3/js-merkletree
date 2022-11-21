@@ -1,12 +1,6 @@
 import { Bytes } from '../../types';
 import { NodeAux, Siblings } from '../../types/merkletree';
-import {
-  ELEM_BYTES_LEN,
-  HASH_BYTES_LENGTH,
-  NOT_EMPTIES_LEN,
-  PROOF_FLAG_LEN,
-  ZERO_HASH
-} from '../../constants';
+import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
 import { siblignsFroomProof, siblings2Bytes } from '../utils';
 
 export default class Proof {
@@ -26,7 +20,7 @@ export default class Proof {
     this.notEmpties = new Uint8Array(arrBuff);
   }
 
-  bytes() {
+  bytes(): Bytes {
     let bsLen = PROOF_FLAG_LEN + this.notEmpties.length + ELEM_BYTES_LEN * this.siblings.length;
 
     if (typeof this.nodeAux !== 'undefined') {
@@ -52,7 +46,7 @@ export default class Proof {
     return bs;
   }
 
-  async allSiblings() {
+  async allSiblings(): Promise<Siblings> {
     return siblignsFroomProof(this);
   }
 }

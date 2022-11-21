@@ -13,7 +13,7 @@ export const getPath = (numLevels: number, k: Bytes): Path => {
   return path;
 };
 
-export const siblings2Bytes = (siblings: Siblings) => {
+export const siblings2Bytes = (siblings: Siblings): Bytes => {
   const siblingBytesBuff = new ArrayBuffer(HASH_BYTES_LENGTH * siblings.length);
   const siblingBytes = new Uint8Array(siblingBytesBuff);
   siblings.forEach((v, i) => {

@@ -1,6 +1,6 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
 import Proof from '../merkletree/proof';
-import { bytesEqual, setBitBigEndian, testBitBigEndian } from './bytes';
+import { bytesEqual, testBitBigEndian } from './bytes';
 import { ZERO_HASH } from '../../constants';
 
 import Hash from '../hash/hash';
@@ -10,25 +10,7 @@ import { getPath } from './merkletree';
 import { NodeMiddle } from '../node/node';
 import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
 
-const newProofFromData = (existence: boolean, allSiblings: Siblings, nodeAux: NodeAux) => {
-  const p = new Proof();
-  p.existence = existence;
-  p.nodeAux = nodeAux;
-  const siblings: Siblings = [];
-  p.depth = allSiblings.length;
-
-  allSiblings.forEach((sibling, lvl) => {
-    if (!bytesEqual(sibling.value, ZERO_HASH.value)) {
-      setBitBigEndian(p.notEmpties, lvl);
-      siblings.push(sibling);
-    }
-  });
-
-  p.siblings = siblings;
-  return p;
-};
-
-export const siblignsFroomProof = (proof: Proof) => {
+export const siblignsFroomProof = (proof: Proof): Siblings => {
   let sibIdx = 0;
   const siblings: Siblings = [];
 
@@ -44,7 +26,12 @@ export const siblignsFroomProof = (proof: Proof) => {
   return siblings;
 };
 
-export const verifyProof = async (rootKey: Hash, proof: Proof, k: bigint, v: bigint) => {
+export const verifyProof = async (
+  rootKey: Hash,
+  proof: Proof,
+  k: bigint,
+  v: bigint
+): Promise<boolean> => {
   try {
     const rFromProof = await rootFromProof(proof, k, v);
     return bytesEqual(rootKey.value, rFromProof.value);
@@ -56,7 +43,7 @@ export const verifyProof = async (rootKey: Hash, proof: Proof, k: bigint, v: big
   }
 };
 
-export const rootFromProof = async (proof: Proof, k: bigint, v: bigint) => {
+export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise<Hash> => {
   const kHash = newHashFromBigInt(k);
   const vHash = newHashFromBigInt(v);
 

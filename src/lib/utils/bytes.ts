@@ -13,7 +13,7 @@ export const bytesEqual: (b1: Bytes, b2: Bytes) => boolean = (b1, b2) => {
 };
 
 // TODO: might be make this generic over typed arrays?
-export const swapEndianness = (bytes: Bytes) => {
+export const swapEndianness = (bytes: Bytes): Bytes => {
   const tempBuffer = new ArrayBuffer(bytes.length);
   const tempBytes = new Uint8Array(tempBuffer);
 
@@ -25,7 +25,7 @@ export const swapEndianness = (bytes: Bytes) => {
 };
 
 // bytes -> big endian
-export const bytesToBitArray = (bytes: Bytes) => {
+export const bytesToBitArray = (bytes: Bytes): Array<BigInt> => {
   if (bytes.length !== HASH_BYTES_LENGTH) {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;
   }
@@ -42,7 +42,7 @@ export const bytesToBitArray = (bytes: Bytes) => {
   return bitArr;
 };
 
-export const bytes2BinaryString = (bytes: Bytes) => {
+export const bytes2BinaryString = (bytes: Bytes): string => {
   return '0b' + bytesToBitArray(bytes).join('');
 };
 
@@ -60,20 +60,20 @@ const byteTo8BitString = (num: number) => {
   return bit8Arr.join('');
 };
 
-export const testBit = (bitMap: Bytes, n: number) => {
+export const testBit = (bitMap: Bytes, n: number): boolean => {
   return (bitMap[parseInt((n / 8).toString())] & (1 << n % 8)) !== 0;
 };
 
-export const testBitBigEndian = (bitMap: Bytes, n: number) => {
+export const testBitBigEndian = (bitMap: Bytes, n: number): boolean => {
   return (bitMap[parseInt((bitMap.length - n / 8 - 1).toString())] & (1 << n % 8)) !== 0;
 };
 
 // SetBitBigEndian sets the bit n in the bitmap to 1, in Big Endian.
-export const setBitBigEndian = (bitMap: Bytes, n: number) => {
+export const setBitBigEndian = (bitMap: Bytes, n: number): void => {
   bitMap[parseInt((bitMap.length - n / 8 - 1).toString(10))] |= 1 << n % 8;
 };
 
-export const bytes2Hex = (u: Bytes) => {
+export const bytes2Hex = (u: Bytes): string => {
   const hextable = '0123456789abcdef';
   const arr = new Array(u.length * 2);
   let j = 0;
@@ -88,7 +88,7 @@ export const bytes2Hex = (u: Bytes) => {
 
 // NOTE: `bytes` should be big endian
 // bytes recieved from Hash.value getter are safe to use since their endianness is swapped, for the same reason the private Hash.bytes { stored in little endian } should never be used
-export const newBigIntFromBytes = (bytes: Bytes) => {
+export const newBigIntFromBytes = (bytes: Bytes): bigint => {
   if (bytes.length !== HASH_BYTES_LENGTH) {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;
   }
@@ -101,17 +101,11 @@ export const newBigIntFromBytes = (bytes: Bytes) => {
   return bigNum;
 };
 
-export const str2Bytes = (str: string) => {
+export const str2Bytes = (str: string): Bytes => {
   return new Uint8Array(str2ArrBuf(str));
 };
 
-const arrBuf2Str = (buf: ArrayBuffer) => {
-  const uInt16Arr = new Uint16Array(buf);
-  const arr = Array.from(uInt16Arr);
-  return String.fromCharCode.apply(null, arr);
-};
-
-const str2ArrBuf = (str: string) => {
+const str2ArrBuf = (str: string): ArrayBuffer => {
   const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
   const bufView = new Uint16Array(buf);
   for (let i = 0, strLen = str.length; i < strLen; i++) {

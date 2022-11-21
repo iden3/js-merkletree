@@ -1,6 +1,7 @@
 import { ElemBytes } from './elemBytes';
 import { DATA_LEN, ELEM_BYTES_LEN } from '../../constants';
 import { bytesEqual } from '../utils';
+import { Bytes } from 'types';
 
 export class Data {
   #value: Array<ElemBytes>;
@@ -9,7 +10,7 @@ export class Data {
     this.#value = new Array<ElemBytes>(DATA_LEN);
   }
 
-  get value() {
+  get value(): Array<ElemBytes> {
     return this.#value;
   }
 
@@ -20,7 +21,7 @@ export class Data {
     this.#value = _v;
   }
 
-  bytes() {
+  bytes(): Bytes {
     const b = new Uint8Array(DATA_LEN * ELEM_BYTES_LEN);
 
     for (let idx = 0; idx < DATA_LEN; idx += 1) {
@@ -31,7 +32,7 @@ export class Data {
     return b;
   }
 
-  equal(d2: Data) {
+  equal(d2: Data): boolean {
     return (
       bytesEqual(this.#value[0].value, d2.value[0].value) &&
       bytesEqual(this.#value[1].value, d2.value[1].value) &&

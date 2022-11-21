@@ -1,7 +1,4 @@
-import { HASH_BYTES_LENGTH } from '../../constants';
-import { Bytes } from '../../types';
 import { checkBigIntInField } from './crypto';
-import { bytesToBitArray, swapEndianness } from './bytes';
 import Hash from '../hash/hash';
 import { bigIntToUINT8Array } from './bigint';
 
