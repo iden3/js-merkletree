@@ -27,19 +27,19 @@ export default class Hash implements IHash {
     this.bytes = swapEndianness(bytes);
   }
 
-  String(): string {
-    return this.BigInt().toString(10);
+  string(): string {
+    return this.bigInt().toString(10);
   }
 
-  Hex(): string {
+  hex(): string {
     return bytes2Hex(this.bytes);
   }
 
-  Equals(hash: Hash): boolean {
+  equals(hash: Hash): boolean {
     return bytesEqual(this.value, hash.value);
   }
 
-  BigInt(): bigint {
+  bigInt(): bigint {
     const bytes = swapEndianness(this.value);
     return BigInt(bytes2BinaryString(bytes));
   }

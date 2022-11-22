@@ -54,7 +54,7 @@ export class NodeMiddle implements Node {
 
   async getKey(): Promise<Hash> {
     if (this.#key === ZERO_HASH) {
-      return hashElems([this.childL.BigInt(), this.childR.BigInt()]);
+      return hashElems([this.childL.bigInt(), this.childR.bigInt()]);
     }
     return this.#key;
   }

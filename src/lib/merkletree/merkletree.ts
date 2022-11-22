@@ -226,8 +226,8 @@ export default class Merkletree {
           //   };
           // }
           return {
-            key: (n as NodeLeaf).entry[0].BigInt(),
-            value: (n as NodeLeaf).entry[1].BigInt(),
+            key: (n as NodeLeaf).entry[0].bigInt(),
+            value: (n as NodeLeaf).entry[1].bigInt(),
             siblings
           };
         case NODE_TYPE_MIDDLE:
@@ -518,13 +518,13 @@ export default class Merkletree {
         case NODE_TYPE_LEAF:
           if (bytesEqual(kHash.value, (n as NodeLeaf).entry[0].value)) {
             p.existence = true;
-            return { proof: p, value: (n as NodeLeaf).entry[1].BigInt() };
+            return { proof: p, value: (n as NodeLeaf).entry[1].bigInt() };
           }
           p.nodeAux = {
             key: (n as NodeLeaf).entry[0],
             value: (n as NodeLeaf).entry[1]
           };
-          return { proof: p, value: (n as NodeLeaf).entry[1].BigInt() };
+          return { proof: p, value: (n as NodeLeaf).entry[1].bigInt() };
         case NODE_TYPE_MIDDLE:
           if (path[p.depth]) {
             nextKey = (n as NodeMiddle).childR;
@@ -599,10 +599,10 @@ export default class Merkletree {
           break;
         case NODE_TYPE_LEAF:
           // eslint-disable-next-line no-console
-          console.log(`"${k.String()}" [style=filled]`);
+          console.log(`"${k.string()}" [style=filled]`);
           break;
         case NODE_TYPE_MIDDLE:
-          lr = [(n as NodeMiddle).childL.String(), (n as NodeMiddle).childR.String()];
+          lr = [(n as NodeMiddle).childL.string(), (n as NodeMiddle).childR.string()];
           emptyNodes = '';
 
           lr.forEach((s, i) => {
@@ -613,7 +613,7 @@ export default class Merkletree {
             }
           });
           // eslint-disable-next-line no-console
-          console.log(`"${k.String()}" -> {"${lr[1]}"}`);
+          console.log(`"${k.string()}" -> {"${lr[1]}"}`);
           // eslint-disable-next-line no-console
           console.log(emptyNodes);
           break;
@@ -632,12 +632,12 @@ export default class Merkletree {
     }
     // eslint-disable-next-line no-console
     console.log(
-      `--------\nGraphViz of the MerkleTree with RootKey ${rootKey.BigInt().toString(10)}\n`
+      `--------\nGraphViz of the MerkleTree with RootKey ${rootKey.bigInt().toString(10)}\n`
     );
     await this.graphViz(ZERO_HASH);
     // eslint-disable-next-line no-console
     console.log(
-      `End of GraphViz of the MerkleTree with RootKey ${rootKey.BigInt().toString(10)}\n--------\n`
+      `End of GraphViz of the MerkleTree with RootKey ${rootKey.bigInt().toString(10)}\n--------\n`
     );
   }
 }
