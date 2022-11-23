@@ -316,7 +316,7 @@ export default class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async getNode(k: Hash): Promise<Node | NodeEmpty> {
+  async getNode(k: Hash): Promise<Node | undefined> {
     if (bytesEqual(k.value, ZERO_HASH.value)) {
       return new NodeEmpty();
     }
