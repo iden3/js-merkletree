@@ -1,7 +1,7 @@
 import { ElemBytes } from './elemBytes';
 import { DATA_LEN, ELEM_BYTES_LEN } from '../../constants';
 import { bytesEqual } from '../utils';
-import { Bytes } from 'types';
+import { Bytes } from '../../types/index';
 
 export class Data {
   #value: Array<ElemBytes>;

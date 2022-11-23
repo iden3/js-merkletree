@@ -19,7 +19,7 @@ export default class inMemmoryDB implements Storage {
     this.#currentRoot = ZERO_HASH;
   }
 
-  async get(k: Bytes): Promise<Node> {
+  async get(k: Bytes): Promise<Node | undefined> {
     const kBytes = new Uint8Array([...this.prefix, ...k]);
     const val = this.#kvMap[kBytes.toString()] ? this.#kvMap[kBytes.toString()] : undefined;
     return val;
