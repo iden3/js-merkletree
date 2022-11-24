@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import { HASH_BYTES_LENGTH, ZERO_HASH } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
-import inMemmoryDB from '../src/lib/db/inMemory';
+import { inMemmoryDB } from '../src/lib/db/inMemory';
+
 import {
   bytes2Hex,
   bytesEqual,
@@ -11,8 +12,9 @@ import {
   str2Bytes,
   verifyProof
 } from '../src/lib/utils';
-import Hash from '../src/lib/hash/hash';
-import Merkletree from '../src/lib/merkletree/merkletree';
+import { Hash } from '../src/lib/hash/hash';
+
+import { Merkletree } from '../src/lib/merkletree/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 import { MAX_NUM_IN_FIELD } from '../src/constants/field';
 

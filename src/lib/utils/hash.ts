@@ -1,5 +1,6 @@
 import { checkBigIntInField } from './crypto';
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { bigIntToUINT8Array } from './bigint';
 
 // returned bytes endianess will be big-endian

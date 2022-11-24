@@ -1,5 +1,6 @@
 import { Bytes, Node, NodeType } from '../../types';
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import {
   EMPTY_NODE_STRING,
   EMPTY_NODE_VALUE,

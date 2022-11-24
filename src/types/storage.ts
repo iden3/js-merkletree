@@ -1,6 +1,6 @@
 import { Node } from './node';
 import { Bytes } from './index';
-import Hash from '../lib/hash/hash';
+import { Hash } from '../lib/hash/hash';
 
 export interface Storage {
   get: (k: Bytes) => Promise<Node | undefined>;
