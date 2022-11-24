@@ -1,4 +1,5 @@
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { newHashFromBigInt } from './hash';
 import { dropLast } from 'ramda';
 

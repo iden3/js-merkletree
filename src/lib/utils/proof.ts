@@ -1,9 +1,11 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
-import Proof from '../merkletree/proof';
+import { Proof } from '../merkletree/proof';
+
 import { bytesEqual, testBitBigEndian } from './bytes';
 import { ZERO_HASH } from '../../constants';
 
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { newHashFromBigInt } from './hash';
 import { leafKey } from './node';
 import { getPath } from './merkletree';

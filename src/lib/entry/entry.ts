@@ -1,5 +1,6 @@
 import { Data } from '../entry/data';
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { ZERO_HASH } from '../../constants/index';
 import { clone } from 'ramda';
 import { elemBytesToBigInts, hashElems } from '../../lib/utils';

@@ -3,7 +3,7 @@ import { HASH_BYTES_LENGTH } from '../../constants/index';
 import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
 import { Bytes, IHash } from '../../types';
 
-export default class Hash implements IHash {
+export class Hash implements IHash {
   // little endian
   bytes: Bytes;
 

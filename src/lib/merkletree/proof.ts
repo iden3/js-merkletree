@@ -3,7 +3,7 @@ import { NodeAux, Siblings } from '../../types/merkletree';
 import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
 import { siblignsFroomProof, siblings2Bytes } from '../utils';
 
-export default class Proof {
+export class Proof {
   existence: boolean;
   depth: number;
   // notempties is a bitmap of non-empty siblings found in siblings
@@ -46,7 +46,7 @@ export default class Proof {
     return bs;
   }
 
-  async allSiblings(): Promise<Siblings> {
+  allSiblings(): Siblings {
     return siblignsFroomProof(this);
   }
 }

@@ -2,11 +2,12 @@
 
 import { Bytes, Node } from '../../types';
 import { Storage } from '../../types/storage';
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { ZERO_HASH } from '../../constants';
 import { clone } from 'ramda';
 
-export default class inMemmoryDB implements Storage {
+export class inMemmoryDB implements Storage {
   prefix: Bytes;
   #kvMap: {
     [k in string]: Node;

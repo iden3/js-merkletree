@@ -1,5 +1,6 @@
 import { Storage } from '../../types/storage';
-import Hash from '../hash/hash';
+import { Hash } from '../hash/hash';
+
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
@@ -24,9 +25,9 @@ import {
   ErrNotWritable,
   ErrReachedMaxLevel
 } from '../errors';
-import Proof from './proof';
+import { Proof } from './proof';
 
-export default class Merkletree {
+export class Merkletree {
   #db: Storage;
   #root: Hash;
   #writable: boolean;
