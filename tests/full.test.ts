@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { HASH_BYTES_LENGTH, ZERO_HASH } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
-import { inMemmoryDB } from '../src/lib/db/inMemory';
+import { InMemoryDB } from '../src/lib/db/inMemory';
 
 import {
   bytes2Hex,
@@ -22,7 +22,7 @@ const TIMEOUT_MIN = 60000;
 
 describe('full test of the SMT library', () => {
   const getInMemoryDB = () => {
-    return new inMemmoryDB(str2Bytes(''));
+    return new InMemoryDB(str2Bytes(''));
   };
 
   it('checks that the implementation of the db.Storage interface behaves as expected', async () => {
@@ -45,7 +45,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test new merkle tree', async () => {
-    const sto = new inMemmoryDB(str2Bytes(''));
+    const sto = new InMemoryDB(str2Bytes(''));
     const mt = new Merkletree(sto, true, 10);
     expect(mt.root.string()).equal('0');
 
