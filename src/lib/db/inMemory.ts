@@ -7,7 +7,7 @@ import { Hash } from '../hash/hash';
 import { ZERO_HASH } from '../../constants';
 import { clone } from 'ramda';
 
-export class inMemmoryDB implements Storage {
+export class InMemoryDB implements Storage {
   prefix: Bytes;
   #kvMap: {
     [k in string]: Node;
