@@ -65,12 +65,12 @@ export const testBit = (bitMap: Bytes, n: number): boolean => {
 };
 
 export const testBitBigEndian = (bitMap: Bytes, n: number): boolean => {
-  return (bitMap[parseInt((bitMap.length - n / 8 - 1).toString())] & (1 << n % 8)) !== 0;
+  return (bitMap[bitMap.length - parseInt(`${n / 8}`) - 1] & (1 << n % 8)) !== 0;
 };
 
 // SetBitBigEndian sets the bit n in the bitmap to 1, in Big Endian.
 export const setBitBigEndian = (bitMap: Bytes, n: number): void => {
-  bitMap[parseInt((bitMap.length - n / 8 - 1).toString(10))] |= 1 << n % 8;
+  bitMap[bitMap.length - parseInt(`${n / 8}`) - 1] |= 1 << n % 8;
 };
 
 export const bytes2Hex = (u: Bytes): string => {
