@@ -2,26 +2,17 @@
   "name": "@iden3/js-merkletree",
   "version": "0.0.0",
   "description": "javascript sparse merkle tree library",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/esm/types/index.d.ts",
-        "module": "./dist/esm/index.js",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/types/index.d.ts",
-        "module": "./dist/cjs/index.js",
-        "default": "./dist/cjs/index.js"
-      }
-    }
-  },
-  "types": "./dist/cjs/types/index.d.ts",
-  "main": "index.js",
-  "module": "./dist/esm/index.mjs",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "source": "./src/index.ts",
+  "esm:esbuild": "dist/esm_esbuild/index.js",
+  "typings": "dist/types/index.d.ts",
   "files": [
-    "dist/**/*"
+    "dist",
+    "config",
+    "scripts",
+    "src",
+    "tsconfig.json"
   ],
   "keywords": [
     "js merkletree",
@@ -48,35 +39,39 @@
   "homepage": "https://github.com/iden3/js-merkletree#readme",
   "scripts": {
     "lint": "eslint --fix --ext .js,.ts src/**",
-    "clean": "rm -rf dist",
-    "build": "npm run clean && tsc -p tsconfig/tsconfig.cjs.json && webpack --config webpack.esm.config.js --mode production && webpack --mode production",
+    "clean": "rimraf ./dist",
+    "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:esm:esbuild && npm run build:tsc",
+    "build:esm:esbuild": "node ./scripts/esm.config.js",
+    "build:esm": "tsc -p config/tsconfig.esm.json",
+    "build:umd": "node ./scripts/umd.config.js",
+    "build:tsc": "tsc --module commonjs",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 './tests/**/*.test.ts'",
-    "format": "prettier --config .prettierrc './**/*.ts' --write"
+    "format": "prettier --config .prettierrc './**/*.ts' --write",
+    "prepare": "npm run build"
   },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^10.0.0",
     "@types/node": "^14.11.2",
     "@types/ramda": "^0.28.18",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "chai": "^4.3.6",
-    "clean-webpack-plugin": "^4.0.0",
-    "crypto-browserify": "^3.12.0",
+    "esbuild": "^0.15.15",
+    "esbuild-node-externals": "^1.5.0",
     "gts": "^3.1.1",
     "mocha": "^10.1.0",
-    "os-browserify": "^0.3.0",
     "process": "^0.11.10",
-    "stream-browserify": "^3.0.0",
+    "rimraf": "^2.7.1",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-merge": "^5.8.0"
+    "typescript": "^4.8.4"
   },
   "dependencies": {
-    "circomlibjs": "^0.1.7",
+    "@iden3/js-crypto": "git@github.com:iden3/js-crypto.git",
     "ramda": "^0.28.0"
   }
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+    <script src="./dist/umd/index.js"></script>
+    <title>Test Iden3Merkletree</title>
+</head>
+
+<body>
+    Test Iden3Merkletree UMD script work
+</body>
+<script>
+    const run = async () => {
+        const {
+            InMemoryDB,
+            Merkletree,
+            str2Bytes,
+            ZERO_HASH,
+            verifyProof
+        } = Iden3Merkletree;
+        const sto = new InMemoryDB(str2Bytes(''));
+        const mt = new Merkletree(sto, true, 10);
+
+        await mt.add(BigInt('1'), BigInt('2'));
+        await mt.add(BigInt('33'), BigInt('44'));
+        await mt.add(BigInt('1234'), BigInt('9876'));
+
+        const { proof, value } = await mt.generateProof(BigInt('33'), ZERO_HASH);
+
+        console.log(await verifyProof(mt.root, proof, BigInt('33'), BigInt('44')));
+
+    };
+    run();
+</script>
+
+</html>

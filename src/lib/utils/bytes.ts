@@ -25,12 +25,12 @@ export const swapEndianness = (bytes: Bytes): Bytes => {
 };
 
 // bytes -> big endian
-export const bytesToBitArray = (bytes: Bytes): Array<BigInt> => {
+export const bytesToBitArray = (bytes: Bytes): Array<bigint> => {
   if (bytes.length !== HASH_BYTES_LENGTH) {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;
   }
 
-  const bitArr: Array<BigInt> = [];
+  const bitArr: Array<bigint> = [];
 
   bytes.forEach((byte) => {
     const bitString = byteTo8BitString(byte);
