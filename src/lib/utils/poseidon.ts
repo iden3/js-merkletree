@@ -1,13 +1,11 @@
-import { Hash } from '../hash/hash';
+import { poseidon } from '@iden3/js-crypto';
 
+import { Hash } from '../hash/hash';
 import { newHashFromBigInt } from './hash';
 import { dropLast } from 'ramda';
 
-const circomlibjs = require('circomlibjs');
-
 export const poseidonHash = async (inputs: bigint[]): Promise<bigint> => {
-  const poseidon = await circomlibjs.buildPoseidon();
-  return BigInt(poseidon.F.toString(poseidon(inputs.map((b) => b.toString(10))), 10));
+  return poseidon.hash(inputs);
 };
 
 export const hashElems = async (e: Array<bigint>): Promise<Hash> => {
