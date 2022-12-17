@@ -1,4 +1,3 @@
-import { splitEvery } from 'ramda';
 import { HASH_BYTES_LENGTH, HASH_SIZE_LENGTH_IN_BITS } from '../../constants';
 import { Bytes } from '../../types';
 
@@ -25,11 +24,13 @@ export const bigIntToUINT8Array = (bigNum: bigint): Bytes => {
   for (let idx = startIDX; idx < bArr.length; idx++) {
     bArr[idx] = bigNumToBinaryArray[idx - startIDX];
   }
-
+  const decimalArr = [];
+  const chunk = bArr.length / 8;
   const bStr = bArr.join('');
-  const decimalArr = splitEvery(8, bStr).map((bStr8Bit) => {
-    return parseInt(bStr8Bit, 2);
-  });
+  for (let i = 0; i < chunk; i++) {
+    const element = parseInt(bStr.slice(i * 8, i * 8 + 8), 2);
+    decimalArr.push(element);
+  }
 
   startIDX = bytes.length - decimalArr.length;
 

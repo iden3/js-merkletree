@@ -5,7 +5,6 @@ import { Storage } from '../../types/storage';
 import { Hash } from '../hash/hash';
 
 import { ZERO_HASH } from '../../constants';
-import { clone } from 'ramda';
 
 export class InMemoryDB implements Storage {
   prefix: Bytes;
@@ -32,10 +31,10 @@ export class InMemoryDB implements Storage {
   }
 
   getRoot(): Hash {
-    return clone(this.#currentRoot);
+    return this.#currentRoot;
   }
 
   setRoot(r: Hash): void {
-    this.#currentRoot = clone(r);
+    this.#currentRoot = r;
   }
 }
