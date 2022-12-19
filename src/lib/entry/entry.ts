@@ -2,7 +2,6 @@ import { Data } from '../entry/data';
 import { Hash } from '../hash/hash';
 
 import { ZERO_HASH } from '../../constants/index';
-import { clone } from 'ramda';
 import { elemBytesToBigInts, hashElems } from '../../lib/utils';
 import { ElemBytes } from '../../lib';
 
@@ -60,6 +59,6 @@ export class Entry {
   }
 
   clone(): Entry {
-    return new Entry(clone(this.#data));
+    return new Entry(this.#data);
   }
 }

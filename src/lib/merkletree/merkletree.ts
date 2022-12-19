@@ -4,7 +4,6 @@ import { Hash } from '../hash/hash';
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import { clone } from 'ramda';
 import {
   bytesEqual,
   checkEntryInField,
@@ -133,9 +132,9 @@ export class Merkletree {
     if (pathNewLeaf[lvl] === pathOldLeaf[lvl]) {
       const nextKey = await this.pushLeaf(newLeaf, oldLeaf, lvl + 1, pathNewLeaf, pathOldLeaf);
       if (pathNewLeaf[lvl]) {
-        newNodeMiddle = new NodeMiddle(clone(ZERO_HASH), nextKey);
+        newNodeMiddle = new NodeMiddle(new Hash(), nextKey);
       } else {
-        newNodeMiddle = new NodeMiddle(nextKey, clone(ZERO_HASH));
+        newNodeMiddle = new NodeMiddle(nextKey, new Hash());
       }
 
       return await this.addNode(newNodeMiddle);
@@ -288,7 +287,7 @@ export class Merkletree {
         case NODE_TYPE_LEAF:
           if (bytesEqual(kHash.value, (n as NodeLeaf).entry[0].value)) {
             cp.oldValue = (n as NodeLeaf).entry[1];
-            cp.siblings = circomSiblingsFromSiblings(clone(siblings), this.maxLevels);
+            cp.siblings = circomSiblingsFromSiblings([...siblings], this.maxLevels);
             const newNodeLeaf = new NodeLeaf(kHash, vHash);
             await this.updateNode(newNodeLeaf);
 

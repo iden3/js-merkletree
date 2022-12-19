@@ -1,4 +1,3 @@
-import { clone } from 'ramda';
 import { HASH_BYTES_LENGTH } from '../../constants/index';
 import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
 import { Bytes, IHash } from '../../types';
@@ -16,7 +15,7 @@ export class Hash implements IHash {
 
   // returns a new copy, in little endian
   get value(): Bytes {
-    return clone(this.bytes);
+    return this.bytes;
   }
 
   // bytes should be in big-endian
