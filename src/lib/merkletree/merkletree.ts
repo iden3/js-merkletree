@@ -496,13 +496,13 @@ export class Merkletree {
     return cp;
   }
 
-  async generateProof(k: bigint, rootKey: Hash): Promise<{ proof: Proof; value: bigint }> {
+  async generateProof(k: bigint, rootKey?: Hash): Promise<{ proof: Proof; value: bigint }> {
     const p = new Proof();
     let siblingKey: Hash;
 
     const kHash = newHashFromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
-    if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
+    if (!rootKey) {
       rootKey = this.root;
     }
     let nextKey = rootKey;

@@ -66,7 +66,7 @@ describe('full test of the SMT library', () => {
 
     expect(sto.getRoot().bigInt().toString()).equal(mt.root.bigInt().toString());
 
-    const { proof, value } = await mt.generateProof(BigInt('33'), ZERO_HASH);
+    const { proof, value } = await mt.generateProof(BigInt('33'));
     expect(value.toString()).equal('44');
 
     expect(await verifyProof(mt.root, proof, BigInt('33'), BigInt('44'))).to.be.true;
@@ -209,7 +209,7 @@ describe('full test of the SMT library', () => {
       await mt.add(k, v);
     }
 
-    const { proof, value } = await mt.generateProof(BigInt('42'), ZERO_HASH);
+    const { proof, value } = await mt.generateProof(BigInt('42'));
     expect(value.toString()).to.be.equal('0');
     const verRes = await verifyProof(mt.root, proof, BigInt('42'), BigInt('0'));
     expect(verRes).to.be.true;
@@ -240,7 +240,7 @@ describe('full test of the SMT library', () => {
       await mt.add(k, v);
     }
 
-    const { proof } = await mt.generateProof(BigInt('4'), ZERO_HASH);
+    const { proof } = await mt.generateProof(BigInt('4'));
     const siblings = siblignsFroomProof(proof);
 
     expect(siblings.length).to.be.equal(6);
@@ -273,7 +273,7 @@ describe('full test of the SMT library', () => {
       await mt.add(BigInt(i), BigInt('0'));
     }
 
-    let { proof } = await mt.generateProof(BigInt('4'), ZERO_HASH);
+    let { proof } = await mt.generateProof(BigInt('4'));
     expect(proof.existence).to.be.true;
     expect(await verifyProof(mt.root, proof, BigInt('4'), BigInt('0'))).to.be.true;
     expect(
@@ -282,11 +282,11 @@ describe('full test of the SMT library', () => {
     );
 
     for (let i = 8; i < 32; i += 1) {
-      const { proof } = await mt.generateProof(BigInt(i), ZERO_HASH);
+      const { proof } = await mt.generateProof(BigInt(i));
     }
 
     // non-existence proof, empty aux
-    proof = (await mt.generateProof(BigInt('12'), ZERO_HASH)).proof;
+    proof = (await mt.generateProof(BigInt('12'))).proof;
     expect(proof.existence).to.be.false;
     expect(await verifyProof(mt.root, proof, BigInt('12'), BigInt('0'))).to.be.true;
     expect(
@@ -295,7 +295,7 @@ describe('full test of the SMT library', () => {
     );
 
     // non-existence proof, node aux
-    proof = (await mt.generateProof(BigInt('10'), ZERO_HASH)).proof;
+    proof = (await mt.generateProof(BigInt('10'))).proof;
     expect(proof.existence).to.be.false;
     expect(proof.nodeAux).to.be.not.undefined;
     expect(await verifyProof(mt.root, proof, BigInt('10'), BigInt('0'))).to.be.true;
@@ -314,12 +314,12 @@ describe('full test of the SMT library', () => {
     }
     // Invalid existence proof (node used for verification doesn't
     // correspond to node in the proof)
-    let { proof } = await mt.generateProof(BigInt('4'), ZERO_HASH);
+    let { proof } = await mt.generateProof(BigInt('4'));
     expect(proof.existence).to.be.true;
     expect(await verifyProof(mt.root, proof, BigInt('5'), BigInt('5'))).to.be.false;
 
     // Invalid non-existence proof (Non-existence proof, diff. node aux)
-    proof = (await mt.generateProof(BigInt('4'), ZERO_HASH)).proof;
+    proof = (await mt.generateProof(BigInt('4'))).proof;
     expect(proof.existence).to.be.true;
     proof.existence = false;
     proof.nodeAux = {
