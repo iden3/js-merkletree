@@ -2,6 +2,9 @@ import { checkBigIntInField } from './crypto';
 import { Hash } from '../hash/hash';
 
 import { bigIntToUINT8Array } from './bigint';
+import { ZERO_HASH } from '../../constants';
+import { Hex } from '@iden3/js-crypto';
+import { swapEndianness } from './bytes';
 
 // returned bytes endianess will be big-endian
 export const newHashFromBigInt = (bigNum: bigint): Hash => {
@@ -17,13 +20,15 @@ export const newHashFromBigInt = (bigNum: bigint): Hash => {
 };
 
 export const newHashFromHex = (h: string): Hash => {
-  const bigNum = BigInt(h);
-
-  if (!checkBigIntInField(bigNum)) {
-    throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
+  if (!h) {
+    return ZERO_HASH;
   }
 
-  return newHashFromBigInt(bigNum);
+  // TODO: add in field check
+
+  let hash = new Hash();
+  hash.value = swapEndianness(Hex.decodeString(h));
+  return hash;
 };
 
 // return object of class Hash from a decimal string
