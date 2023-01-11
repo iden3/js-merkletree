@@ -1,6 +1,6 @@
 {
   "name": "@iden3/js-merkletree",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "javascript sparse merkle tree library",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -32,7 +32,7 @@
     "url": "https://github.com/iden3/js-merkletree.git"
   },
   "author": "Iden3 Core team",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/iden3/js-merkletree-core/issues"
   },
@@ -46,8 +46,7 @@
     "build:umd": "node ./scripts/umd.config.js",
     "build:tsc": "tsc --module commonjs",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 './tests/**/*.test.ts'",
-    "format": "prettier --config .prettierrc './**/*.ts' --write",
-    "prepare": "npm run build"
+    "format": "prettier --config .prettierrc './**/*.ts' --write"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
@@ -71,6 +70,6 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@iden3/js-crypto": "git@github.com:iden3/js-crypto.git"
+    "@iden3/js-crypto": "0.0.2"
   }
 }
