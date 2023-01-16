@@ -1,6 +1,7 @@
 import { HASH_BYTES_LENGTH, ZERO_HASH } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB } from '../src/lib/db';
+import 'mock-local-storage';
 
 import {
   bytes2Hex,
@@ -21,8 +22,6 @@ import { expect } from 'chai';
 const TIMEOUT_MIN = 60000;
 
 global.window = {} as any;
-import 'mock-local-storage';
-import { ITreeStorage } from '../src/types';
 window.localStorage = global.localStorage;
 
 enum TreeStorageType  {
