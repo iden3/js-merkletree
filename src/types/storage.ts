@@ -2,7 +2,7 @@ import { Node } from './node';
 import { Bytes } from './index';
 import { Hash } from '../lib/hash/hash';
 
-export interface Storage {
+export interface ITreeStorage {
   get: (k: Bytes) => Promise<Node | undefined>;
   put: (k: Bytes, n: Node) => void;
   getRoot: () => Hash;

@@ -1,13 +1,13 @@
 // in Memory Database implementation
 
 import { Bytes, Node } from '../../types';
-import { Storage } from '../../types/storage';
+import { ITreeStorage } from '../../types/storage';
 import { Hash } from '../hash/hash';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import { bytes2Hex } from '../utils';
 
-export class LocalStorageDB implements Storage {
+export class LocalStorageDB implements ITreeStorage {
   prefix: Bytes;
   #currentRoot: Hash;
 

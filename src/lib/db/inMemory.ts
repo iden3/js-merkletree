@@ -1,12 +1,12 @@
 // in Memory Database implementation
 
 import { Bytes, Node } from '../../types';
-import { Storage } from '../../types/storage';
+import { ITreeStorage } from '../../types/storage';
 import { Hash } from '../hash/hash';
 
 import { ZERO_HASH } from '../../constants';
 
-export class InMemoryDB implements Storage {
+export class InMemoryDB implements ITreeStorage {
   prefix: Bytes;
   #kvMap: {
     [k in string]: Node;
