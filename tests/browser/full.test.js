@@ -1,32 +1,33 @@
-import { HASH_BYTES_LENGTH, ZERO_HASH } from '../src/constants';
-import { NodeMiddle } from '../src/lib/node/node';
-import { InMemoryDB } from '../src/lib/db/inMemory';
-
-import {
+const {
   bytes2Hex,
   bytesEqual,
   newHashFromBigInt,
   poseidonHash,
   siblignsFroomProof,
   str2Bytes,
-  verifyProof
-} from '../src/lib/utils';
-import { Hash } from '../src/lib/hash/hash';
+  verifyProof,
 
-import { Merkletree } from '../src/lib/merkletree/merkletree';
-import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
-import { MAX_NUM_IN_FIELD } from '../src/constants/field';
-import {expect} from "chai";
+  NodeMiddle,
+  LocalStorageDB,
+
+  HASH_BYTES_LENGTH, ZERO_HASH,
+
+  Hash,
+  Merkletree,
+  ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel,
+  MAX_NUM_IN_FIELD
+} = Iden3Merkletree
 
 const TIMEOUT_MIN = 60000;
 
-describe('full test of the SMT library', () => {
-  const getInMemoryDB = () => {
-    return new InMemoryDB(str2Bytes(''));
-  };
+describe("full test of the SMT library", (done) => {
+
+  const getLocalStorageDB = () => {
+    return new LocalStorageDB(str2Bytes(''))
+  }
 
   it('checks that the implementation of the db.Storage interface behaves as expected', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const v = new Hash();
 
     const buff = new ArrayBuffer(HASH_BYTES_LENGTH);
@@ -39,13 +40,15 @@ describe('full test of the SMT library', () => {
     await sto.put(k.value, node);
     const val = await sto.get(k.value);
 
+    globalThis.val = val
     expect(val).not.undefined;
-    expect((val as NodeMiddle).childL.hex()).eq(v.hex());
-    expect((val as NodeMiddle).childR.hex()).eq(v.hex());
+    expect((val ).childL.hex()).to.equal(v.hex());
+    expect((val ).childR.hex()).to.equal(v.hex());
   });
 
   it('test new merkle tree', async () => {
-    const sto = new InMemoryDB(str2Bytes(''));
+    globalThis.localStorage.clear()
+    const sto =  getLocalStorageDB(str2Bytes('test2'));
     const mt = new Merkletree(sto, true, 10);
     expect(mt.root.string()).equal('0');
 
@@ -63,19 +66,19 @@ describe('full test of the SMT library', () => {
     expect(mt.root.bigInt().toString(10)).equal(
       '14204494359367183802864593755198662203838502594566452929175967972147978322084'
     );
-
+    
     expect(sto.getRoot().bigInt().toString()).equal(mt.root.bigInt().toString());
-
+    
     const { proof, value } = await mt.generateProof(BigInt('33'));
     expect(value.toString()).equal('44');
-
+    
     expect(await verifyProof(mt.root, proof, BigInt('33'), BigInt('44'))).to.be.true;
-
+    
     expect(await verifyProof(mt.root, proof, BigInt('33'), BigInt('45'))).to.be.false;
   });
 
   it('test tree with one node', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 10);
     expect(bytesEqual(mt.root.value, ZERO_HASH.value)).to.be.true;
 
@@ -89,8 +92,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test add and different order', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -113,7 +116,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test add repeated index', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     const k = BigInt('3');
@@ -128,7 +131,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test get', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 16; i += 1) {
@@ -153,7 +156,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test update', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 16; i += 1) {
@@ -178,8 +181,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test update 2', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -199,7 +202,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test generate and verify proof 128', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 128; i += 1) {
@@ -216,7 +219,7 @@ describe('full test of the SMT library', () => {
   }).timeout(TIMEOUT_MIN * 10);
 
   it('test tree limit', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 5);
 
     for (let i = 0; i < 16; i += 1) {
@@ -231,7 +234,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test sibligns from proof', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 64; i += 1) {
@@ -266,7 +269,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test and verify proof cases', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 8; i += 1) {
@@ -306,7 +309,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test and verify proof false', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 140);
 
     for (let i = 0; i < 8; i += 1) {
@@ -327,11 +330,12 @@ describe('full test of the SMT library', () => {
       value: newHashFromBigInt(BigInt('4'))
     };
 
-    expect(await verifyProof(mt.root, proof, BigInt('4'), BigInt('0'))).to.be.false;
+    const res = await verifyProof(mt.root, proof, BigInt('4'), BigInt('0'))
+    expect(res).to.be.false;
   });
 
   it('test delete', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 10);
     expect(mt.root.string()).to.be.equal('0');
 
@@ -363,8 +367,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test delete 2', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -394,8 +398,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test delete 3', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -417,8 +421,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test delete 4', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -442,8 +446,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test delete 5', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -465,7 +469,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test delete not existing keys', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 10);
 
     await mt.add(BigInt('1'), BigInt('2'));
@@ -490,8 +494,8 @@ describe('full test of the SMT library', () => {
   });
 
   it('test dump leafs and import leafs', async () => {
-    const sto1 = getInMemoryDB();
-    const sto2 = getInMemoryDB();
+    const sto1 = getLocalStorageDB();
+    const sto2 = getLocalStorageDB();
     const mt1 = new Merkletree(sto1, true, 140);
     const mt2 = new Merkletree(sto2, true, 140);
 
@@ -506,7 +510,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test add and get circom proof', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 10);
 
     expect(mt.root.string()).to.be.equal('0');
@@ -569,7 +573,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test update circom processor proof', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 10);
 
     for (let i = 0; i < 16; i += 1) {
@@ -611,7 +615,7 @@ describe('full test of the SMT library', () => {
   });
 
   it('test smt verifier', async () => {
-    const sto = getInMemoryDB();
+    const sto = getLocalStorageDB();
     const mt = new Merkletree(sto, true, 4);
 
     await mt.add(BigInt('1'), BigInt('11'));
@@ -654,4 +658,4 @@ describe('full test of the SMT library', () => {
     expect(cvp.value.string()).to.be.equal('22');
     expect(cvp.fnc).to.be.equal(0);
   });
-}).timeout(TIMEOUT_MIN * 5);
+}).timeout(TIMEOUT_MIN*10)

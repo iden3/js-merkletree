@@ -43,7 +43,7 @@
     "build": "npm run clean && npm run build:esm && npm run build:umd && npm run build:esm:esbuild && npm run build:tsc",
     "build:esm:esbuild": "node ./scripts/esm.config.js",
     "build:esm": "tsc -p config/tsconfig.esm.json",
-    "build:umd": "node ./scripts/umd.config.js",
+    "build:umd": "node ./scripts/umd.config.js && cp dist/umd/index.js ./tests/browser/js-tree.js && cp dist/umd/index.js.map ./tests/browser/index.js.map",
     "build:tsc": "tsc --module commonjs",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 './tests/**/*.test.ts'",
     "format": "prettier --config .prettierrc './**/*.ts' --write"

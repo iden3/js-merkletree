@@ -14,6 +14,7 @@ export const newHashFromBigInt = (bigNum: bigint): Hash => {
 
   const bytes = bigIntToUINT8Array(bigNum);
 
+
   const hash = new Hash();
   hash.value = bytes;
   return hash;

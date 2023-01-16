@@ -119,3 +119,7 @@ dist
 # other
 .DS_Store
 .idea
+
+# build files in tests/browser
+/tests/browser/index.js.map
+/tests/browser/js-tree.js
