@@ -1,6 +1,6 @@
 {
   "name": "@iden3/js-merkletree",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "javascript sparse merkle tree library",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -8,11 +8,7 @@
   "esm:esbuild": "dist/esm_esbuild/index.js",
   "typings": "dist/types/index.d.ts",
   "files": [
-    "dist",
-    "config",
-    "scripts",
-    "src",
-    "tsconfig.json"
+    "dist"
   ],
   "keywords": [
     "js merkletree",
