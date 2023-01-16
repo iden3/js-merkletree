@@ -14,7 +14,6 @@ export const newHashFromBigInt = (bigNum: bigint): Hash => {
 
   const bytes = bigIntToUINT8Array(bigNum);
 
-
   const hash = new Hash();
   hash.value = bytes;
   return hash;
@@ -27,7 +26,7 @@ export const newHashFromHex = (h: string): Hash => {
 
   // TODO: add in field check
 
-  let hash = new Hash();
+  const hash = new Hash();
   hash.value = swapEndianness(Hex.decodeString(h));
   return hash;
 };
