@@ -119,3 +119,4 @@ dist
 # other
 .DS_Store
 .idea
+.vscode
