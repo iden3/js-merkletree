@@ -1,4 +1,4 @@
-import { Storage } from '../../types/storage';
+import { ITreeStorage } from '../../types/storage';
 import { Hash } from '../hash/hash';
 
 import { Node } from '../../types';
@@ -27,12 +27,12 @@ import {
 import { Proof } from './proof';
 
 export class Merkletree {
-  #db: Storage;
+  #db: ITreeStorage;
   #root: Hash;
   #writable: boolean;
   #maxLevel: number;
 
-  constructor(_db: Storage, _writable: boolean, _maxLevels: number) {
+  constructor(_db: ITreeStorage, _writable: boolean, _maxLevels: number) {
     this.#db = _db;
     this.#writable = _writable;
     this.#maxLevel = _maxLevels;

@@ -41,7 +41,7 @@
     "build:esm": "tsc -p config/tsconfig.esm.json",
     "build:umd": "node ./scripts/umd.config.js",
     "build:tsc": "tsc --module commonjs",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 './tests/**/*.test.ts'",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 --require mock-local-storage './tests/**/*.test.ts'",
     "format": "prettier --config .prettierrc './**/*.ts' --write"
   },
   "devDependencies": {
@@ -59,6 +59,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "mocha": "^10.1.0",
+    "mock-local-storage": "^1.1.23",
     "prettier": "^2.7.1",
     "rimraf": "^2.7.1",
     "ts-loader": "^9.4.1",

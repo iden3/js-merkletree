@@ -26,7 +26,7 @@ export const newHashFromHex = (h: string): Hash => {
 
   // TODO: add in field check
 
-  let hash = new Hash();
+  const hash = new Hash();
   hash.value = swapEndianness(Hex.decodeString(h));
   return hash;
 };
