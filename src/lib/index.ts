@@ -1,4 +1,4 @@
-export * from './db/inMemory';
+export * from './db/index';
 export * from './entry/index';
 export * from './errors/index';
 export * from './hash/hash';
