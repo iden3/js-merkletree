@@ -2,22 +2,27 @@
 
 import { Bytes, Node } from '../../types';
 import { ITreeStorage } from '../../types/storage';
-import { Hash } from '../hash/hash';
-import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
+import { Hash, ZERO_HASH } from '../hash/hash';
+import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import { bytes2Hex } from '../utils';
 
 export class LocalStorageDB implements ITreeStorage {
-  prefix: Bytes;
   #currentRoot: Hash;
 
-  constructor(_prefix: Bytes) {
-    this.prefix = _prefix;
-    this.#currentRoot = ZERO_HASH;
+  constructor(private readonly _prefix: Bytes) {
+    const rootStr = localStorage.getItem(bytes2Hex(_prefix));
+    if (rootStr) {
+      const bytes: number[] = JSON.parse(rootStr);
+
+      this.#currentRoot = new Hash(Uint8Array.from(bytes));
+    } else {
+      this.#currentRoot = ZERO_HASH;
+    }
   }
 
   async get(k: Bytes): Promise<Node | undefined> {
-    const kBytes = new Uint8Array([...this.prefix, ...k]);
+    const kBytes = new Uint8Array([...this._prefix, ...k]);
     const key = bytes2Hex(kBytes);
     const val = localStorage.getItem(key);
 
@@ -77,7 +82,7 @@ export class LocalStorageDB implements ITreeStorage {
   }
 
   async put(k: Bytes, n: Node): Promise<void> {
-    const kBytes = new Uint8Array([...this.prefix, ...k]);
+    const kBytes = new Uint8Array([...this._prefix, ...k]);
     const key = bytes2Hex(kBytes);
     const val = JSON.stringify(n);
     localStorage.setItem(key, val);
@@ -89,5 +94,6 @@ export class LocalStorageDB implements ITreeStorage {
 
   setRoot(r: Hash): void {
     this.#currentRoot = r;
+    localStorage.setItem(bytes2Hex(this._prefix), JSON.stringify(Array.from(r.bytes)));
   }
 }

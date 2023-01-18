@@ -101,15 +101,5 @@ export const newBigIntFromBytes = (bytes: Bytes): bigint => {
   return bigNum;
 };
 
-export const str2Bytes = (str: string): Bytes => {
-  return new Uint8Array(str2ArrBuf(str));
-};
-
-const str2ArrBuf = (str: string): ArrayBuffer => {
-  const buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
-  const bufView = new Uint16Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-};
+export const str2Bytes = (str: string): Bytes =>
+  new Uint8Array(str.length * 2).map((_, i) => str.charCodeAt(i));

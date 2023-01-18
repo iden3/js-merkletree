@@ -1,8 +1,7 @@
 import { checkBigIntInField } from './crypto';
-import { Hash } from '../hash/hash';
+import { Hash, ZERO_HASH } from '../hash/hash';
 
 import { bigIntToUINT8Array } from './bigint';
-import { ZERO_HASH } from '../../constants';
 import { Hex } from '@iden3/js-crypto';
 import { swapEndianness } from './bytes';
 

@@ -1,8 +1,8 @@
 import { ITreeStorage } from '../../types/storage';
-import { Hash } from '../hash/hash';
+import { Hash, ZERO_HASH } from '../hash/hash';
 
 import { Node } from '../../types';
-import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
+import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import {
   bytesEqual,
@@ -61,7 +61,7 @@ export class Merkletree {
     const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
     this.#root = newRootKey;
 
-    await this.#db.setRoot(this.root);
+    this.#db.setRoot(this.root);
   }
 
   async updateNode(n: Node): Promise<Hash> {
@@ -420,7 +420,7 @@ export class Merkletree {
         const newRootKey = await this.recalculatePathUntilRoot(path, newNode, siblings.slice(0, i));
 
         this.#root = newRootKey;
-        await this.#db.setRoot(this.root);
+        this.#db.setRoot(this.root);
         break;
       }
 

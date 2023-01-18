@@ -6,11 +6,12 @@ export class Hash implements IHash {
   // little endian
   bytes: Bytes;
 
-  constructor() {
-    // const buffer = new ArrayBuffer(HASH_BYTES_LENGTH);
-    this.bytes = new Uint8Array([
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ]);
+  constructor(_bytes?: Bytes) {
+    if (_bytes?.length) {
+      this.bytes = _bytes;
+    } else {
+      this.bytes = new Uint8Array(HASH_BYTES_LENGTH);
+    }
   }
 
   // returns a new copy, in little endian
@@ -43,3 +44,5 @@ export class Hash implements IHash {
     return BigInt(bytes2BinaryString(bytes));
   }
 }
+
+export const ZERO_HASH = new Hash();

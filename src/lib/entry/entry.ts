@@ -1,7 +1,6 @@
 import { Data } from '../entry/data';
-import { Hash } from '../hash/hash';
+import { Hash, ZERO_HASH } from '../hash/hash';
 
-import { ZERO_HASH } from '../../constants/index';
 import { elemBytesToBigInts, hashElems } from '../../lib/utils';
 import { ElemBytes } from '../../lib';
 

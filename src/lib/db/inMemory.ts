@@ -2,9 +2,7 @@
 
 import { Bytes, Node } from '../../types';
 import { ITreeStorage } from '../../types/storage';
-import { Hash } from '../hash/hash';
-
-import { ZERO_HASH } from '../../constants';
+import { Hash, ZERO_HASH } from '../hash/hash';
 
 export class InMemoryDB implements ITreeStorage {
   prefix: Bytes;
