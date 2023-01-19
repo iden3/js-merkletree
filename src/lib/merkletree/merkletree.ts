@@ -75,7 +75,7 @@ export class Merkletree {
 
     const k = await n.getKey();
 
-    this.#db.put(k.value, n);
+    await this.#db.put(k.value, n);
     return k;
   }
 
@@ -92,7 +92,7 @@ export class Merkletree {
     //   throw ErrNodeKeyAlreadyExists;
     // }
 
-    this.#db.put(k.value, n);
+    await this.#db.put(k.value, n);
     return k;
   }
 

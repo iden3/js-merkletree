@@ -4,7 +4,7 @@ import { Hash } from '../lib/hash/hash';
 
 export interface ITreeStorage {
   get: (k: Bytes) => Promise<Node | undefined>;
-  put: (k: Bytes, n: Node) => void;
+  put: (k: Bytes, n: Node) => Promise<void>;
   getRoot: () => Hash;
   setRoot: (r: Hash) => Promise<void>;
 }
