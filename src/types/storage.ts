@@ -1,5 +1,5 @@
 import { Node } from './node';
-import { Bytes } from './index';
+import { Bytes } from './bytes';
 import { Hash } from '../lib/hash/hash';
 
 export interface ITreeStorage {

@@ -7,7 +7,6 @@ import {
   bytes2Hex,
   bytesEqual,
   newHashFromBigInt,
-  poseidonHash,
   siblignsFroomProof,
   str2Bytes,
   verifyProof
@@ -18,6 +17,7 @@ import { Merkletree } from '../src/lib/merkletree/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 import { MAX_NUM_IN_FIELD } from '../src/constants/field';
 import { expect } from 'chai';
+import { poseidon } from '@iden3/js-crypto';
 
 const TIMEOUT_MIN = 60000;
 
@@ -103,7 +103,7 @@ for (let index = 0; index < storages.length; index++) {
           '798876344175601936808542466911896801961231313012372360729165540443724338832'
         );
         const inputs = [BigInt('100'), BigInt('200'), BigInt('1')];
-        const res = await poseidonHash(inputs);
+        const res = poseidon.hash(inputs);
         expect(mt.root.bigInt().toString()).equal(res.toString());
       });
 
@@ -245,7 +245,7 @@ for (let index = 0; index < storages.length; index++) {
         try {
           await mt.add(BigInt('16'), BigInt('16'));
         } catch (err) {
-          expect(err).to.be.equal(ErrReachedMaxLevel);
+          expect((err as Error).message).to.equal(ErrReachedMaxLevel);
         }
       });
 

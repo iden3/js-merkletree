@@ -1,5 +1,5 @@
-import { HASH_BYTES_LENGTH } from '../../constants/index';
-import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
+import { HASH_BYTES_LENGTH } from '../../constants';
+import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils';
 import { Bytes, IHash } from '../../types';
 
 export class Hash implements IHash {

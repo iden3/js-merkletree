@@ -124,7 +124,7 @@ export class Merkletree {
     pathOldLeaf: Array<boolean>
   ): Promise<Hash> {
     if (lvl > this.#maxLevel - 2) {
-      throw ErrReachedMaxLevel;
+      throw new Error(ErrReachedMaxLevel);
     }
 
     let newNodeMiddle: NodeMiddle;
@@ -155,7 +155,7 @@ export class Merkletree {
 
   async addLeaf(newLeaf: NodeLeaf, key: Hash, lvl: number, path: Array<boolean>): Promise<Hash> {
     if (lvl > this.#maxLevel - 1) {
-      throw ErrReachedMaxLevel;
+      throw new Error(ErrReachedMaxLevel);
     }
 
     const n = await this.getNode(key);
@@ -244,7 +244,7 @@ export class Merkletree {
       }
     }
 
-    throw ErrReachedMaxLevel;
+    throw new Error(ErrReachedMaxLevel);
   }
 
   async update(k: bigint, v: bigint): Promise<CircomProcessorProof> {

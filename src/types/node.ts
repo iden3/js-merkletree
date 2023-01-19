@@ -1,5 +1,5 @@
 import { Hash } from '../lib/hash/hash';
-import { Bytes } from './index';
+import { Bytes } from './bytes';
 
 export type NodeType = 0 | 1 | 2;
 

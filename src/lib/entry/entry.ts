@@ -29,14 +29,14 @@ export class Entry {
 
   async hIndex(): Promise<Hash> {
     if (this.#hIndex === ZERO_HASH) {
-      return await hashElems(elemBytesToBigInts(this.index));
+      return hashElems(elemBytesToBigInts(this.index));
     }
     return this.#hIndex;
   }
 
   async hValue(): Promise<Hash> {
     if (this.#hValue === ZERO_HASH) {
-      return await hashElems(elemBytesToBigInts(this.value));
+      return hashElems(elemBytesToBigInts(this.value));
     }
     return this.#hValue;
   }
