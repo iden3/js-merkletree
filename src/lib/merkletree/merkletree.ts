@@ -61,7 +61,7 @@ export class Merkletree {
     const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
     this.#root = newRootKey;
 
-    this.#db.setRoot(this.root);
+    await this.#db.setRoot(this.root);
   }
 
   async updateNode(n: Node): Promise<Hash> {
@@ -113,7 +113,7 @@ export class Merkletree {
 
     const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
     this.#root = newRootKey;
-    this.#db.setRoot(newRootKey);
+    await this.#db.setRoot(newRootKey);
   }
 
   async pushLeaf(
@@ -294,7 +294,7 @@ export class Merkletree {
             const newRootKey = await this.recalculatePathUntilRoot(path, newNodeLeaf, siblings);
 
             this.#root = newRootKey;
-            this.#db.setRoot(newRootKey);
+            await this.#db.setRoot(newRootKey);
             cp.newRoot = newRootKey;
             return cp;
           }
@@ -397,14 +397,14 @@ export class Merkletree {
   async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings): Promise<void> {
     if (siblings.length === 0) {
       this.#root = ZERO_HASH;
-      this.#db.setRoot(this.root);
+      await this.#db.setRoot(this.root);
       return;
     }
 
     const toUpload = siblings[siblings.length - 1];
     if (siblings.length < 2) {
       this.#root = siblings[0];
-      this.#db.setRoot(this.#root);
+      await this.#db.setRoot(this.#root);
     }
 
     for (let i = siblings.length - 2; i >= 0; i -= 1) {
@@ -420,13 +420,13 @@ export class Merkletree {
         const newRootKey = await this.recalculatePathUntilRoot(path, newNode, siblings.slice(0, i));
 
         this.#root = newRootKey;
-        this.#db.setRoot(this.root);
+        await this.#db.setRoot(this.root);
         break;
       }
 
       if (i === 0) {
         this.#root = toUpload;
-        this.#db.setRoot(this.root);
+        await this.#db.setRoot(this.root);
         break;
       }
     }

@@ -92,7 +92,7 @@ export class LocalStorageDB implements ITreeStorage {
     return this.#currentRoot;
   }
 
-  setRoot(r: Hash): void {
+  async setRoot(r: Hash): Promise<void> {
     this.#currentRoot = r;
     localStorage.setItem(bytes2Hex(this._prefix), JSON.stringify(Array.from(r.bytes)));
   }

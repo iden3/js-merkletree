@@ -32,7 +32,7 @@ export class InMemoryDB implements ITreeStorage {
     return this.#currentRoot;
   }
 
-  setRoot(r: Hash): void {
+  async setRoot(r: Hash): Promise<void> {
     this.#currentRoot = r;
   }
 }

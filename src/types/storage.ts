@@ -6,7 +6,7 @@ export interface ITreeStorage {
   get: (k: Bytes) => Promise<Node | undefined>;
   put: (k: Bytes, n: Node) => void;
   getRoot: () => Hash;
-  setRoot: (r: Hash) => void;
+  setRoot: (r: Hash) => Promise<void>;
 }
 
 export type KV = {

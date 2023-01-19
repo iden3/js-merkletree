@@ -8,6 +8,9 @@ export class Hash implements IHash {
 
   constructor(_bytes?: Bytes) {
     if (_bytes?.length) {
+      if (_bytes.length !== HASH_BYTES_LENGTH) {
+        throw new Error(`Expected 32 bytes, found ${_bytes.length} bytes`);
+      }
       this.bytes = _bytes;
     } else {
       this.bytes = new Uint8Array(HASH_BYTES_LENGTH);
