@@ -24,40 +24,8 @@ export const swapEndianness = (bytes: Bytes): Bytes => {
   return tempBytes;
 };
 
-// bytes -> big endian
-export const bytesToBitArray = (bytes: Bytes): Array<bigint> => {
-  if (bytes.length !== HASH_BYTES_LENGTH) {
-    throw `Expected 32 bytes, found ${bytes.length} bytes`;
-  }
-
-  const bitArr: Array<bigint> = [];
-
-  bytes.forEach((byte) => {
-    const bitString = byteTo8BitString(byte);
-    bitString.split('').forEach((bit) => {
-      bitArr.push(BigInt(bit));
-    });
-  });
-
-  return bitArr;
-};
-
 export const bytes2BinaryString = (bytes: Bytes): string => {
-  return '0b' + bytesToBitArray(bytes).join('');
-};
-
-const byteTo8BitString = (num: number) => {
-  const bit8Arr = ['0', '0', '0', '0', '0', '0', '0', '0'];
-  const byteBitStr = num.toString(2);
-  const byteBitStrArr = byteBitStr.split('');
-
-  const startIDX = bit8Arr.length - byteBitStr.length;
-
-  for (let idx = startIDX; idx < bit8Arr.length; idx += 1) {
-    bit8Arr[idx] = byteBitStrArr[idx - startIDX];
-  }
-
-  return bit8Arr.join('');
+  return '0b' + bytes.reduce((acc, i) => acc + i.toString(2).padStart(8, '0'), '');
 };
 
 export const testBit = (bitMap: Bytes, n: number): boolean => {
@@ -73,8 +41,8 @@ export const setBitBigEndian = (bitMap: Bytes, n: number): void => {
   bitMap[bitMap.length - parseInt(`${n / 8}`) - 1] |= 1 << n % 8;
 };
 
+const hextable = '0123456789abcdef';
 export const bytes2Hex = (u: Bytes): string => {
-  const hextable = '0123456789abcdef';
   const arr = new Array(u.length * 2);
   let j = 0;
   u.forEach((v) => {
