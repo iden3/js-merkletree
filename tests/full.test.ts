@@ -1,4 +1,4 @@
-import { HASH_BYTES_LENGTH, ZERO_HASH } from '../src/constants';
+import { HASH_BYTES_LENGTH } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB } from '../src/lib/db';
 import 'mock-local-storage';
@@ -7,39 +7,41 @@ import {
   bytes2Hex,
   bytesEqual,
   newHashFromBigInt,
-  poseidonHash,
   siblignsFroomProof,
   str2Bytes,
   verifyProof
 } from '../src/lib/utils';
-import { Hash } from '../src/lib/hash/hash';
+import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
 
 import { Merkletree } from '../src/lib/merkletree/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 import { MAX_NUM_IN_FIELD } from '../src/constants/field';
 import { expect } from 'chai';
+import { poseidon } from '@iden3/js-crypto';
 
 const TIMEOUT_MIN = 60000;
 
 global.window = {} as any;
 window.localStorage = global.localStorage;
 
-enum TreeStorageType  {
-  LocalStorageDB = "localStorage",
-  InMemoryDB = "memoryStorage"
+enum TreeStorageType {
+  LocalStorageDB = 'localStorage',
+  InMemoryDB = 'memoryStorage'
 }
 
+const storages: TreeStorageType[] = [TreeStorageType.InMemoryDB, TreeStorageType.LocalStorageDB];
 
-var storages: TreeStorageType[] = [ TreeStorageType.InMemoryDB,TreeStorageType.LocalStorageDB];
-
-for(let index = 0; index < storages.length;index++) {
+for (let index = 0; index < storages.length; index++) {
   describe
     .only(`full test of the SMT library: ${storages[index].toString()}`, () => {
-      const getTreeStorage = () => {
-        if (storages[index] == TreeStorageType.LocalStorageDB){
-          return new LocalStorageDB(str2Bytes(''));
+      beforeEach(() => {
+        localStorage.clear();
+      });
+      const getTreeStorage = (prefix = '') => {
+        if (storages[index] == TreeStorageType.LocalStorageDB) {
+          return new LocalStorageDB(str2Bytes(prefix));
         }
-        return new InMemoryDB(str2Bytes(''))
+        return new InMemoryDB(str2Bytes(prefix));
       };
 
       it('checks that the implementation of the db.Storage interface behaves as expected', async () => {
@@ -101,13 +103,13 @@ for(let index = 0; index < storages.length;index++) {
           '798876344175601936808542466911896801961231313012372360729165540443724338832'
         );
         const inputs = [BigInt('100'), BigInt('200'), BigInt('1')];
-        const res = await poseidonHash(inputs);
+        const res = poseidon.hash(inputs);
         expect(mt.root.bigInt().toString()).equal(res.toString());
       });
 
       it('test add and different order', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -117,7 +119,7 @@ for(let index = 0; index < storages.length;index++) {
           await mt1.add(k, v);
         }
 
-        for (let i = 0; i < 16; i += 1) {
+        for (let i = 15; i >= 0; i -= 1) {
           const k = BigInt(i);
           const v = BigInt('0');
           await mt2.add(k, v);
@@ -195,8 +197,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test update 2', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -243,7 +245,7 @@ for(let index = 0; index < storages.length;index++) {
         try {
           await mt.add(BigInt('16'), BigInt('16'));
         } catch (err) {
-          expect(err).to.be.equal(ErrReachedMaxLevel);
+          expect((err as Error).message).to.equal(ErrReachedMaxLevel);
         }
       });
 
@@ -380,8 +382,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test delete 2', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -411,8 +413,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test delete 3', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -434,8 +436,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test delete 4', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -459,8 +461,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test delete 5', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 
@@ -507,8 +509,8 @@ for(let index = 0; index < storages.length;index++) {
       });
 
       it('test dump leafs and import leafs', async () => {
-        const sto1 = getTreeStorage();
-        const sto2 = getTreeStorage();
+        const sto1 = getTreeStorage('tree1');
+        const sto2 = getTreeStorage('tree2');
         const mt1 = new Merkletree(sto1, true, 140);
         const mt2 = new Merkletree(sto2, true, 140);
 

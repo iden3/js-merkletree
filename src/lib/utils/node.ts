@@ -9,7 +9,7 @@ import { bigIntToUINT8Array } from './bigint';
 import { Bytes, NodeType } from '../../types';
 
 export const leafKey = async (k: Hash, v: Hash): Promise<Hash> => {
-  return await hashElemsKey(BigInt(1), [k.bigInt(), v.bigInt()]);
+  return hashElemsKey(BigInt(1), [k.bigInt(), v.bigInt()]);
 };
 
 export const nodeValue = (type: NodeType, a: Hash, b: Hash): Bytes => {

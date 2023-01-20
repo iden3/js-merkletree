@@ -1,13 +1,12 @@
 import { Bytes, Node, NodeType } from '../../types';
-import { Hash } from '../hash/hash';
+import { Hash, ZERO_HASH } from '../hash/hash';
 
 import {
   EMPTY_NODE_STRING,
   EMPTY_NODE_VALUE,
   NODE_TYPE_EMPTY,
   NODE_TYPE_LEAF,
-  NODE_TYPE_MIDDLE,
-  ZERO_HASH
+  NODE_TYPE_MIDDLE
 } from '../../constants';
 import { leafKey, nodeValue } from '../utils/node';
 import { hashElems } from '../utils';

@@ -1,16 +1,20 @@
-import { HASH_BYTES_LENGTH } from '../../constants/index';
-import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils/index';
+import { HASH_BYTES_LENGTH } from '../../constants';
+import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils';
 import { Bytes, IHash } from '../../types';
 
 export class Hash implements IHash {
   // little endian
   bytes: Bytes;
 
-  constructor() {
-    // const buffer = new ArrayBuffer(HASH_BYTES_LENGTH);
-    this.bytes = new Uint8Array([
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ]);
+  constructor(_bytes?: Bytes) {
+    if (_bytes?.length) {
+      if (_bytes.length !== HASH_BYTES_LENGTH) {
+        throw new Error(`Expected ${HASH_BYTES_LENGTH} bytes, found ${_bytes.length} bytes`);
+      }
+      this.bytes = _bytes;
+    } else {
+      this.bytes = new Uint8Array(HASH_BYTES_LENGTH);
+    }
   }
 
   // returns a new copy, in little endian
@@ -43,3 +47,5 @@ export class Hash implements IHash {
     return BigInt(bytes2BinaryString(bytes));
   }
 }
+
+export const ZERO_HASH = new Hash();

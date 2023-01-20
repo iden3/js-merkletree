@@ -1,23 +1,29 @@
+/* eslint-disable no-case-declarations */
 // in Memory Database implementation
 
 import { Bytes, Node } from '../../types';
 import { ITreeStorage } from '../../types/storage';
-import { Hash } from '../hash/hash';
-import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE, ZERO_HASH } from '../../constants';
+import { Hash, ZERO_HASH } from '../hash/hash';
+import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import { bytes2Hex } from '../utils';
 
 export class LocalStorageDB implements ITreeStorage {
-  prefix: Bytes;
   #currentRoot: Hash;
 
-  constructor(_prefix: Bytes) {
-    this.prefix = _prefix;
-    this.#currentRoot = ZERO_HASH;
+  constructor(private readonly _prefix: Bytes) {
+    const rootStr = localStorage.getItem(bytes2Hex(_prefix));
+    if (rootStr) {
+      const bytes: number[] = JSON.parse(rootStr);
+
+      this.#currentRoot = new Hash(Uint8Array.from(bytes));
+    } else {
+      this.#currentRoot = ZERO_HASH;
+    }
   }
 
   async get(k: Bytes): Promise<Node | undefined> {
-    const kBytes = new Uint8Array([...this.prefix, ...k]);
+    const kBytes = new Uint8Array([...this._prefix, ...k]);
     const key = bytes2Hex(kBytes);
     const val = localStorage.getItem(key);
 
@@ -30,45 +36,13 @@ export class LocalStorageDB implements ITreeStorage {
       case NODE_TYPE_EMPTY:
         return new NodeEmpty();
       case NODE_TYPE_MIDDLE:
-        // eslint-disable-next-line no-case-declarations
-        const { childL, childR } = obj;
-
-        // eslint-disable-next-line no-case-declarations
-        const cL = new Hash();
-        cL.bytes = Uint8Array.from(
-          Object.keys(childL.bytes).map((k) => {
-            return childL.bytes[k];
-          })
-        );
-
-        // eslint-disable-next-line no-case-declarations
-        const cR = new Hash();
-        cR.bytes = Uint8Array.from(
-          Object.keys(childR.bytes).map((k) => {
-            return childR.bytes[k];
-          })
-        );
+        const cL = new Hash(Uint8Array.from(obj.childL));
+        const cR = new Hash(Uint8Array.from(obj.childR));
 
         return new NodeMiddle(cL, cR);
       case NODE_TYPE_LEAF:
-        // eslint-disable-next-line no-case-declarations
-        const { entry } = obj;
-
-        // eslint-disable-next-line no-case-declarations
-        const k = new Hash();
-        k.bytes = Uint8Array.from(
-          Object.keys(entry[0].bytes).map((k) => {
-            return entry[0].bytes[k];
-          })
-        );
-
-        // eslint-disable-next-line no-case-declarations
-        const v = new Hash();
-        v.bytes = Uint8Array.from(
-          Object.keys(entry[1].bytes).map((k) => {
-            return entry[1].bytes[k];
-          })
-        );
+        const k = new Hash(Uint8Array.from(obj.entry[0]));
+        const v = new Hash(Uint8Array.from(obj.entry[1]));
 
         return new NodeLeaf(k, v);
     }
@@ -77,9 +51,18 @@ export class LocalStorageDB implements ITreeStorage {
   }
 
   async put(k: Bytes, n: Node): Promise<void> {
-    const kBytes = new Uint8Array([...this.prefix, ...k]);
+    const kBytes = new Uint8Array([...this._prefix, ...k]);
     const key = bytes2Hex(kBytes);
-    const val = JSON.stringify(n);
+    const toSerialize: Record<string, unknown> = {
+      type: n.type
+    };
+    if (n instanceof NodeMiddle) {
+      toSerialize.childL = Array.from(n.childL.bytes);
+      toSerialize.childR = Array.from(n.childR.bytes);
+    } else if (n instanceof NodeLeaf) {
+      toSerialize.entry = [Array.from(n.entry[0].bytes), Array.from(n.entry[1].bytes)];
+    }
+    const val = JSON.stringify(toSerialize);
     localStorage.setItem(key, val);
   }
 
@@ -87,7 +70,8 @@ export class LocalStorageDB implements ITreeStorage {
     return this.#currentRoot;
   }
 
-  setRoot(r: Hash): void {
+  async setRoot(r: Hash): Promise<void> {
     this.#currentRoot = r;
+    localStorage.setItem(bytes2Hex(this._prefix), JSON.stringify(Array.from(r.bytes)));
   }
 }
