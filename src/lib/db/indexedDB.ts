@@ -1,6 +1,3 @@
-/* eslint-disable no-case-declarations */
-// in Memory Database implementation
-
 import { Bytes, Node } from '../../types';
 import { ITreeStorage } from '../../types/storage';
 import { Hash, ZERO_HASH } from '../hash/hash';
