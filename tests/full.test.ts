@@ -49,18 +49,20 @@ for (let index = 0; index < storages.length; index++) {
     const getTreeStorage = (prefix = '') => {
       if (storages[index] == TreeStorageType.LocalStorageDB) {
         return new LocalStorageDB(str2Bytes(prefix));
+      } else if (storages[index] == TreeStorageType.IndexedDB) {
+        return new IndexedDBStorage(str2Bytes(prefix));
+      } else if (storages[index] == TreeStorageType.InMemoryDB) {
+        return new InMemoryDB(str2Bytes(prefix));
       }
-      return new InMemoryDB(str2Bytes(prefix));
+      throw new Error('error: unknown storage type');
     };
 
     it('checks that the implementation of the db.Storage interface behaves as expected', async () => {
       const sto = getTreeStorage();
-      const v = new Hash();
 
-      const buff = new ArrayBuffer(HASH_BYTES_LENGTH);
-      const bytes = new Uint8Array(buff);
-      (bytes[0] = 1), (bytes[0] = 2), (bytes[0] = 3), (bytes[0] = 1);
-      v.value = bytes;
+      const bytes = new Uint8Array(HASH_BYTES_LENGTH);
+      bytes[0] = 1;
+      const v = new Hash(bytes);
 
       const node = new NodeMiddle(v, v);
       const k = await node.getKey();

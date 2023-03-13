@@ -3,6 +3,8 @@ import { ITreeStorage } from '../../types/storage';
 import { Hash, ZERO_HASH } from '../hash/hash';
 import { bytes2Hex } from '../utils';
 import { get, set, UseStore, createStore } from 'idb-keyval';
+import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
+import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 
 export class IndexedDBStorage implements ITreeStorage {
   public static readonly storageName = 'merkle-tree';
@@ -22,7 +24,25 @@ export class IndexedDBStorage implements ITreeStorage {
   async get(k: Bytes): Promise<Node | undefined> {
     const kBytes = new Uint8Array([...this._prefix, ...k]);
     const key = bytes2Hex(kBytes);
-    return await get(key, this._store);
+    const obj = await get(key, this._store);
+    if (obj === null || obj === undefined) {
+      return undefined;
+    }
+    if (obj.type === NODE_TYPE_EMPTY) {
+      return new NodeEmpty();
+    }
+    if (obj.type === NODE_TYPE_MIDDLE) {
+      const cL = new Hash(Uint8Array.from(obj.childL.bytes));
+      const cR = new Hash(Uint8Array.from(obj.childR.bytes));
+      return new NodeMiddle(cL, cR);
+    }
+    if (obj.type === NODE_TYPE_LEAF) {
+      const k = new Hash(Uint8Array.from(obj.entry[0].bytes));
+      const v = new Hash(Uint8Array.from(obj.entry[1].bytes));
+
+      return new NodeLeaf(k, v);
+    }
+    throw new Error(`error: value found for key ${key} is not of type Node`);
   }
 
   async put(k: Bytes, n: Node): Promise<void> {
