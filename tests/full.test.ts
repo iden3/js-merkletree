@@ -21,7 +21,6 @@ import { MAX_NUM_IN_FIELD } from '../src/constants/field';
 import { expect } from 'chai';
 import { poseidon } from '@iden3/js-crypto';
 import 'fake-indexeddb/auto';
-
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
   InMemoryDB = 'memoryStorage',
@@ -77,45 +76,47 @@ for (let index = 0; index < storages.length; index++) {
     it('test new merkle tree', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
-      expect(mt.root.string()).equal('0');
+      expect((await mt.root()).string()).equal('0');
 
       await mt.add(BigInt('1'), BigInt('2'));
-      expect(mt.root.bigInt().toString(10)).equal(
+      expect((await mt.root()).bigInt().toString(10)).equal(
         '13578938674299138072471463694055224830892726234048532520316387704878000008795'
       );
 
       await mt.add(BigInt('33'), BigInt('44'));
-      expect(mt.root.bigInt().toString(10)).equal(
+      expect((await mt.root()).bigInt().toString(10)).equal(
         '5412393676474193513566895793055462193090331607895808993925969873307089394741'
       );
 
       await mt.add(BigInt('1234'), BigInt('9876'));
-      expect(mt.root.bigInt().toString(10)).equal(
+      expect((await mt.root()).bigInt().toString(10)).equal(
         '14204494359367183802864593755198662203838502594566452929175967972147978322084'
       );
 
-      expect(sto.getRoot().bigInt().toString()).equal(mt.root.bigInt().toString());
+      expect((await sto.getRoot()).bigInt().toString()).equal(
+        (await mt.root()).bigInt().toString()
+      );
 
       const { proof, value } = await mt.generateProof(BigInt('33'));
       expect(value.toString()).equal('44');
 
-      expect(await verifyProof(mt.root, proof, BigInt('33'), BigInt('44'))).to.be.true;
+      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('44'))).to.be.true;
 
-      expect(await verifyProof(mt.root, proof, BigInt('33'), BigInt('45'))).to.be.false;
+      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('45'))).to.be.false;
     });
 
     it('test tree with one node', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
-      expect(bytesEqual(mt.root.value, ZERO_HASH.value)).to.be.true;
+      expect(bytesEqual((await mt.root()).value, ZERO_HASH.value)).to.be.true;
 
       await mt.add(BigInt('100'), BigInt('200'));
-      expect(mt.root.bigInt().toString(10)).equal(
+      expect((await mt.root()).bigInt().toString(10)).equal(
         '798876344175601936808542466911896801961231313012372360729165540443724338832'
       );
       const inputs = [BigInt('100'), BigInt('200'), BigInt('1')];
       const res = poseidon.hash(inputs);
-      expect(mt.root.bigInt().toString()).equal(res.toString());
+      expect((await mt.root()).bigInt().toString()).equal(res.toString());
     });
 
     it('test add and different order', async () => {
@@ -136,8 +137,8 @@ for (let index = 0; index < storages.length; index++) {
         await mt2.add(k, v);
       }
 
-      expect(mt1.root.string()).to.equal(mt2.root.string());
-      expect(mt1.root.hex()).to.equal(
+      expect((await mt1.root()).string()).to.equal((await mt2.root()).string());
+      expect((await mt1.root()).hex()).to.equal(
         '3b89100bec24da9275c87bc188740389e1d5accfc7d88ba5688d7fa96a00d82f'
       );
     });
@@ -203,8 +204,8 @@ for (let index = 0; index < storages.length; index++) {
         expect(err).to.be.equal(ErrKeyNotFound);
       }
 
-      const dbRoot = sto.getRoot();
-      expect(dbRoot.string()).equal(mt.root.string());
+      const dbRoot = await sto.getRoot();
+      expect(dbRoot.string()).equal((await mt.root()).string());
     });
 
     it('test update 2', async () => {
@@ -225,7 +226,7 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.update(BigInt('2'), BigInt('22'));
       await mt2.update(BigInt('9876'), BigInt('6789'));
 
-      expect(mt1.root.string()).to.be.equal(mt2.root.string());
+      expect((await mt1.root()).string()).to.be.equal((await mt2.root()).string());
     });
 
     it('test generate and verify proof 128', async () => {
@@ -241,7 +242,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const { proof, value } = await mt.generateProof(BigInt('42'));
       expect(value.toString()).to.be.equal('0');
-      const verRes = await verifyProof(mt.root, proof, BigInt('42'), BigInt('0'));
+      const verRes = await verifyProof(await mt.root(), proof, BigInt('42'), BigInt('0'));
       expect(verRes).to.be.true;
     });
 
@@ -305,7 +306,7 @@ for (let index = 0; index < storages.length; index++) {
 
       let { proof } = await mt.generateProof(BigInt('4'));
       expect(proof.existence).to.be.true;
-      expect(await verifyProof(mt.root, proof, BigInt('4'), BigInt('0'))).to.be.true;
+      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'))).to.be.true;
       expect(
         bytes2Hex(proof.bytes()),
         '0003000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df06'
@@ -318,7 +319,7 @@ for (let index = 0; index < storages.length; index++) {
       // non-existence proof, empty aux
       proof = (await mt.generateProof(BigInt('12'))).proof;
       expect(proof.existence).to.be.false;
-      expect(await verifyProof(mt.root, proof, BigInt('12'), BigInt('0'))).to.be.true;
+      expect(await verifyProof(await mt.root(), proof, BigInt('12'), BigInt('0'))).to.be.true;
       expect(
         bytes2Hex(proof.bytes()),
         '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df0604000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
@@ -328,7 +329,7 @@ for (let index = 0; index < storages.length; index++) {
       proof = (await mt.generateProof(BigInt('10'))).proof;
       expect(proof.existence).to.be.false;
       expect(proof.nodeAux).not.undefined;
-      expect(await verifyProof(mt.root, proof, BigInt('10'), BigInt('0'))).to.be.true;
+      expect(await verifyProof(await mt.root(), proof, BigInt('10'), BigInt('0'))).to.be.true;
       expect(
         bytes2Hex(proof.bytes()),
         '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df0604000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
@@ -346,7 +347,7 @@ for (let index = 0; index < storages.length; index++) {
       // correspond to node in the proof)
       let { proof } = await mt.generateProof(BigInt('4'));
       expect(proof.existence).to.be.true;
-      expect(await verifyProof(mt.root, proof, BigInt('5'), BigInt('5'))).to.be.false;
+      expect(await verifyProof(await mt.root(), proof, BigInt('5'), BigInt('5'))).to.be.false;
 
       // Invalid non-existence proof (Non-existence proof, diff. node aux)
       proof = (await mt.generateProof(BigInt('4'))).proof;
@@ -357,39 +358,39 @@ for (let index = 0; index < storages.length; index++) {
         value: newHashFromBigInt(BigInt('4'))
       };
 
-      expect(await verifyProof(mt.root, proof, BigInt('4'), BigInt('0'))).to.be.false;
+      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'))).to.be.false;
     });
 
     it('test delete', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
-      expect(mt.root.string()).to.be.equal('0');
+      expect((await mt.root()).string()).to.be.equal('0');
 
       await mt.add(BigInt('1'), BigInt('2'));
-      expect(mt.root.string()).to.be.equal(
+      expect((await mt.root()).string()).to.be.equal(
         '13578938674299138072471463694055224830892726234048532520316387704878000008795'
       );
 
       await mt.add(BigInt('33'), BigInt('44'));
-      expect(mt.root.string()).to.be.equal(
+      expect((await mt.root()).string()).to.be.equal(
         '5412393676474193513566895793055462193090331607895808993925969873307089394741'
       );
 
       await mt.add(BigInt('1234'), BigInt('9876'));
-      expect(mt.root.string()).to.be.equal(
+      expect((await mt.root()).string()).to.be.equal(
         '14204494359367183802864593755198662203838502594566452929175967972147978322084'
       );
 
       await mt.delete(BigInt('33'));
-      expect(mt.root.string()).to.be.equal(
+      expect((await mt.root()).string()).to.be.equal(
         '15550352095346187559699212771793131433118240951738528922418613687814377955591'
       );
 
       await mt.delete(BigInt('1234'));
       await mt.delete(BigInt('1'));
 
-      expect(mt.root.string()).to.be.equal('0');
-      expect(mt.root.string()).to.be.equal(sto.getRoot().string());
+      expect((await mt.root()).string()).to.be.equal('0');
+      expect((await mt.root()).string()).to.be.equal((await sto.getRoot()).string());
     });
 
     it('test delete 2', async () => {
@@ -404,7 +405,7 @@ for (let index = 0; index < storages.length; index++) {
         await mt1.add(k, v);
       }
 
-      const expectedRootStr = mt1.root.string();
+      const expectedRootStr = (await mt1.root()).string();
 
       const k = BigInt('8');
       const v = BigInt('0');
@@ -412,7 +413,7 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(k, v);
       await mt1.delete(k);
 
-      expect(expectedRootStr).to.be.equal(mt1.root.string());
+      expect(expectedRootStr).to.be.equal((await mt1.root()).string());
 
       for (let i = 0; i < 8; i += 1) {
         const k = BigInt(i);
@@ -420,7 +421,7 @@ for (let index = 0; index < storages.length; index++) {
         await mt2.add(k, v);
       }
 
-      expect(mt1.root.string()).to.be.equal(mt2.root.string());
+      expect((await mt1.root()).string()).to.be.equal((await mt2.root()).string());
     });
 
     it('test delete 3', async () => {
@@ -432,18 +433,18 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('1'), BigInt('1'));
       await mt1.add(BigInt('2'), BigInt('2'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '19060075022714027595905950662613111880864833370144986660188929919683258088314'
       );
 
       await mt1.delete(BigInt('1'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '849831128489032619062850458217693666094013083866167024127442191257793527951'
       );
 
       await mt2.add(BigInt('2'), BigInt('2'));
-      expect(mt1.root.string()).to.be.equal(mt2.root.string());
+      expect((await mt1.root()).string()).to.be.equal((await mt2.root()).string());
     });
 
     it('test delete 4', async () => {
@@ -456,19 +457,19 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('2'), BigInt('2'));
       await mt1.add(BigInt('3'), BigInt('3'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '14109632483797541575275728657193822866549917334388996328141438956557066918117'
       );
 
       await mt1.delete(BigInt('1'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '159935162486187606489815340465698714590556679404589449576549073038844694972'
       );
 
       await mt2.add(BigInt('2'), BigInt('2'));
       await mt2.add(BigInt('3'), BigInt('3'));
-      expect(mt1.root.string()).to.be.equal(mt2.root.string());
+      expect((await mt1.root()).string()).to.be.equal((await mt2.root()).string());
     });
 
     it('test delete 5', async () => {
@@ -480,18 +481,18 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('1'), BigInt('2'));
       await mt1.add(BigInt('33'), BigInt('44'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '5412393676474193513566895793055462193090331607895808993925969873307089394741'
       );
 
       await mt1.delete(BigInt('1'));
 
-      expect(mt1.root.string()).to.be.equal(
+      expect((await mt1.root()).string()).to.be.equal(
         '18869260084287237667925661423624848342947598951870765316380602291081195309822'
       );
 
       await mt2.add(BigInt('33'), BigInt('44'));
-      expect(mt1.root.string()).to.be.equal(mt2.root.string());
+      expect((await mt1.root()).string()).to.be.equal((await mt2.root()).string());
     });
 
     it('test delete not existing keys', async () => {
@@ -510,7 +511,7 @@ for (let index = 0; index < storages.length; index++) {
       }
 
       await mt.delete(BigInt('1'));
-      expect(mt.root.string()).to.be.equal('0');
+      expect((await mt.root()).string()).to.be.equal('0');
 
       try {
         await mt.delete(BigInt('33'));
@@ -539,7 +540,7 @@ for (let index = 0; index < storages.length; index++) {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
-      expect(mt.root.string()).to.be.equal('0');
+      expect((await mt.root()).string()).to.be.equal('0');
 
       let cp = await mt.addAndGetCircomProof(BigInt('1'), BigInt('2'));
 

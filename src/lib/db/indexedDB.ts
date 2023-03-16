@@ -9,16 +9,15 @@ import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 export class IndexedDBStorage implements ITreeStorage {
   public static readonly storageName = 'merkle-tree';
 
+  private readonly _prefixHash: string;
   private readonly _store: UseStore;
 
   #currentRoot: Hash;
 
   constructor(private readonly _prefix: Bytes) {
-    this._store = createStore(`${IndexedDBStorage.storageName}-db`, IndexedDBStorage.storageName);
     this.#currentRoot = ZERO_HASH;
-    get(bytes2Hex(_prefix), this._store).then((root) => {
-      this.#currentRoot = root || ZERO_HASH;
-    });
+    this._prefixHash = bytes2Hex(_prefix);
+    this._store = createStore(`${IndexedDBStorage.storageName}-db`, IndexedDBStorage.storageName);
   }
 
   async get(k: Bytes): Promise<Node | undefined> {
@@ -51,12 +50,22 @@ export class IndexedDBStorage implements ITreeStorage {
     await set(key, n, this._store);
   }
 
-  getRoot(): Hash {
+  async getRoot(): Promise<Hash> {
+    if (!this.#currentRoot.equals(ZERO_HASH)) {
+      return this.#currentRoot;
+    }
+    const root = await get(this._prefixHash, this._store);
+
+    if (!root) {
+      this.#currentRoot = ZERO_HASH;
+    } else {
+      this.#currentRoot = new Hash(root.bytes);
+    }
     return this.#currentRoot;
   }
 
   async setRoot(r: Hash): Promise<void> {
     this.#currentRoot = r;
-    await set(bytes2Hex(this._prefix), r, this._store);
+    await set(this._prefixHash, r, this._store);
   }
 }

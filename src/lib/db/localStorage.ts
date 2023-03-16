@@ -65,7 +65,7 @@ export class LocalStorageDB implements ITreeStorage {
     localStorage.setItem(key, val);
   }
 
-  getRoot(): Hash {
+  async getRoot(): Promise<Hash> {
     return this.#currentRoot;
   }
 
