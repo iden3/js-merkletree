@@ -1,5 +1,4 @@
 /* eslint-disable no-case-declarations */
-// in Memory Database implementation
 
 import { Bytes, Node } from '../../types';
 import { ITreeStorage } from '../../types/storage';
@@ -66,7 +65,7 @@ export class LocalStorageDB implements ITreeStorage {
     localStorage.setItem(key, val);
   }
 
-  getRoot(): Hash {
+  async getRoot(): Promise<Hash> {
     return this.#currentRoot;
   }
 

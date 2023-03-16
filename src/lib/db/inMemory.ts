@@ -28,7 +28,7 @@ export class InMemoryDB implements ITreeStorage {
     this.#kvMap[kBytes.toString()] = n;
   }
 
-  getRoot(): Hash {
+  async getRoot(): Promise<Hash> {
     return this.#currentRoot;
   }
 

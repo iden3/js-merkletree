@@ -28,7 +28,7 @@ import { Proof } from './proof';
 
 export class Merkletree {
   #db: ITreeStorage;
-  #root: Hash;
+  #root!: Hash;
   #writable: boolean;
   #maxLevel: number;
 
@@ -36,10 +36,12 @@ export class Merkletree {
     this.#db = _db;
     this.#writable = _writable;
     this.#maxLevel = _maxLevels;
-    this.#root = this.#db.getRoot();
   }
 
-  get root(): Hash {
+  async root(): Promise<Hash> {
+    if (!this.#root) {
+      this.#root = await this.#db.getRoot();
+    }
     return this.#root;
   }
 
@@ -52,16 +54,16 @@ export class Merkletree {
       throw ErrNotWritable;
     }
 
+    this.#root = await this.root();
     const kHash = newHashFromBigInt(k);
     const vHash = newHashFromBigInt(v);
 
     const newNodeLeaf = new NodeLeaf(kHash, vHash);
     const path = getPath(this.maxLevels, kHash.value);
 
-    const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
+    const newRootKey = await this.addLeaf(newNodeLeaf, this.#root, 0, path);
     this.#root = newRootKey;
-
-    await this.#db.setRoot(this.root);
+    await this.#db.setRoot(this.#root);
   }
 
   async updateNode(n: Node): Promise<Hash> {
@@ -104,16 +106,16 @@ export class Merkletree {
     if (!checkEntryInField(e)) {
       throw 'elements not inside the finite field over r';
     }
-
+    this.#root = await this.#db.getRoot();
     const hIndex = await e.hIndex();
     const hValue = await e.hValue();
 
     const newNodeLeaf = new NodeLeaf(hIndex, hValue);
     const path = getPath(this.maxLevels, hIndex.value);
 
-    const newRootKey = await this.addLeaf(newNodeLeaf, this.root, 0, path);
+    const newRootKey = await this.addLeaf(newNodeLeaf, this.#root, 0, path);
     this.#root = newRootKey;
-    await this.#db.setRoot(newRootKey);
+    await this.#db.setRoot(this.#root);
   }
 
   async pushLeaf(
@@ -201,7 +203,7 @@ export class Merkletree {
     const kHash = newHashFromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
-    let nextKey = this.root;
+    let nextKey = await this.root();
     const siblings: Siblings = [];
 
     for (let i = 0; i < this.maxLevels; i++) {
@@ -267,12 +269,12 @@ export class Merkletree {
     const cp = new CircomProcessorProof();
 
     cp.fnc = 1;
-    cp.oldRoot = this.root;
+    cp.oldRoot = await this.root();
     cp.oldKey = kHash;
     cp.newKey = kHash;
     cp.newValue = vHash;
 
-    let nextKey = this.root;
+    let nextKey = await this.root();
     const siblings: Siblings = [];
 
     for (let i = 0; i < this.maxLevels; i += 1) {
@@ -397,7 +399,7 @@ export class Merkletree {
   async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings): Promise<void> {
     if (siblings.length === 0) {
       this.#root = ZERO_HASH;
-      await this.#db.setRoot(this.root);
+      await this.#db.setRoot(this.#root);
       return;
     }
 
@@ -420,13 +422,13 @@ export class Merkletree {
         const newRootKey = await this.recalculatePathUntilRoot(path, newNode, siblings.slice(0, i));
 
         this.#root = newRootKey;
-        await this.#db.setRoot(this.root);
+        await this.#db.setRoot(this.#root);
         break;
       }
 
       if (i === 0) {
         this.#root = toUpload;
-        await this.#db.setRoot(this.root);
+        await this.#db.setRoot(this.#root);
         break;
       }
     }
@@ -457,7 +459,7 @@ export class Merkletree {
 
   async walk(rootKey: Hash, f: (n: Node) => Promise<void>): Promise<void> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
-      rootKey = this.root;
+      rootKey = await this.root();
     }
     await this.walk(rootKey, f);
   }
@@ -470,7 +472,7 @@ export class Merkletree {
 
   async generateSCVerifierProof(k: bigint, rootKey: Hash): Promise<CircomVerifierProof> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
-      rootKey = this.root;
+      rootKey = await this.root();
     }
 
     const { proof, value } = await this.generateProof(k, rootKey);
@@ -503,7 +505,7 @@ export class Merkletree {
     const kHash = newHashFromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
     if (!rootKey) {
-      rootKey = this.root;
+      rootKey = await this.root();
     }
     let nextKey = rootKey;
 
@@ -549,7 +551,7 @@ export class Merkletree {
   async addAndGetCircomProof(k: bigint, v: bigint): Promise<CircomProcessorProof> {
     const cp = new CircomProcessorProof();
     cp.fnc = 2;
-    cp.oldRoot = this.root;
+    cp.oldRoot = await this.root();
     let key = BigInt('0');
     let value = BigInt('0');
     let siblings: Siblings = [];
@@ -580,7 +582,7 @@ export class Merkletree {
 
     cp.newKey = newHashFromBigInt(k);
     cp.newValue = newHashFromBigInt(v);
-    cp.newRoot = this.root;
+    cp.newRoot = await this.root();
 
     return cp;
   }
@@ -628,7 +630,7 @@ export class Merkletree {
 
   async printGraphViz(rootKey: Hash): Promise<void> {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
-      rootKey = this.root;
+      rootKey = await this.root();
     }
     // eslint-disable-next-line no-console
     console.log(
