@@ -1,6 +1,6 @@
 {
   "name": "@iden3/js-merkletree",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "javascript sparse merkle tree library",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -68,7 +68,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@iden3/js-crypto": "1.0.0-beta.0",
+    "@iden3/js-crypto": "1.0.0-beta.1",
     "idb-keyval": "^6.2.0"
   }
 }
