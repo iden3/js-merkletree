@@ -556,7 +556,7 @@ for (let index = 0; index < storages.length; index++) {
       cp.siblings.forEach((s) => {
         expect(s.string()).to.be.equal('0');
       });
-      expect(mt.maxLevels + 1).equal(cp.siblings.length);
+      expect(mt.maxLevels).equal(cp.siblings.length);
 
       cp = await mt.addAndGetCircomProof(BigInt('33'), BigInt('44'));
 
@@ -574,7 +574,7 @@ for (let index = 0; index < storages.length; index++) {
       cp.siblings.forEach((s) => {
         expect(s.string()).to.be.equal('0');
       });
-      expect(mt.maxLevels + 1).equal(cp.siblings.length);
+      expect(mt.maxLevels).equal(cp.siblings.length);
 
       cp = await mt.addAndGetCircomProof(BigInt('55'), BigInt('66'));
 
@@ -596,7 +596,7 @@ for (let index = 0; index < storages.length; index++) {
             : '0'
         );
       });
-      expect(mt.maxLevels + 1).equal(cp.siblings.length);
+      expect(mt.maxLevels).equal(cp.siblings.length);
     });
 
     it('test update circom processor proof', async () => {
@@ -668,7 +668,7 @@ for (let index = 0; index < storages.length; index++) {
       expect(cvp.root.string()).to.be.equal(
         '13558168455220559042747853958949063046226645447188878859760119761585093422436'
       );
-      expect(cvp.siblings.length).to.be.equal(5);
+      expect(cvp.siblings.length).to.be.equal(4);
       expect(cvp.siblings[0].string()).to.be.equal(
         '11620130507635441932056895853942898236773847390796721536119314875877874016518'
       );
