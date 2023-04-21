@@ -65,7 +65,7 @@ export class IndexedDBStorage implements ITreeStorage {
   }
 
   async setRoot(r: Hash): Promise<void> {
-    this.#currentRoot = r;
     await set(this._prefixHash, r, this._store);
+    this.#currentRoot = r;
   }
 }
