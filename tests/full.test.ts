@@ -2,8 +2,9 @@ import { UseStore, createStore, clear } from 'idb-keyval';
 import { IndexedDBStorage } from '../src/lib/db/indexedDB';
 import { HASH_BYTES_LENGTH } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
-import { InMemoryDB, LocalStorageDB } from '../src/lib/db';
+import { InMemoryDB, LocalStorageDB, SnapStorageDB, snapStorage } from '../src/lib/db';
 import 'mock-local-storage';
+import './mock-snap';
 
 import {
   bytes2Hex,
@@ -24,13 +25,15 @@ import 'fake-indexeddb/auto';
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
   InMemoryDB = 'memoryStorage',
-  IndexedDB = 'indexedDB'
+  IndexedDB = 'indexedDB',
+  SnapDB = 'snapDB'
 }
 
 const storages: TreeStorageType[] = [
   TreeStorageType.InMemoryDB,
   TreeStorageType.LocalStorageDB,
-  TreeStorageType.IndexedDB
+  TreeStorageType.IndexedDB,
+  TreeStorageType.SnapDB
 ];
 
 for (let index = 0; index < storages.length; index++) {
@@ -42,6 +45,7 @@ for (let index = 0; index < storages.length; index++) {
 
     beforeEach(async () => {
       localStorage.clear();
+      await snapStorage.clear();
       await clear(store);
     });
 
@@ -52,6 +56,8 @@ for (let index = 0; index < storages.length; index++) {
         return new IndexedDBStorage(str2Bytes(prefix));
       } else if (storages[index] == TreeStorageType.InMemoryDB) {
         return new InMemoryDB(str2Bytes(prefix));
+      } else if (storages[index] == TreeStorageType.SnapDB) {
+        return new SnapStorageDB(str2Bytes(prefix));
       }
       throw new Error('error: unknown storage type');
     };
