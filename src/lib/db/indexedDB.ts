@@ -14,10 +14,13 @@ export class IndexedDBStorage implements ITreeStorage {
 
   #currentRoot: Hash;
 
-  constructor(private readonly _prefix: Bytes) {
+  constructor(private readonly _prefix: Bytes, databaseName?: string) {
     this.#currentRoot = ZERO_HASH;
     this._prefixHash = bytes2Hex(_prefix);
-    this._store = createStore(`${IndexedDBStorage.storageName}-db`, IndexedDBStorage.storageName);
+    this._store = createStore(
+      `${databaseName ?? IndexedDBStorage.storageName}-db`,
+      IndexedDBStorage.storageName
+    );
   }
 
   async get(k: Bytes): Promise<Node | undefined> {
