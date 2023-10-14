@@ -1,6 +1,14 @@
 import { HASH_BYTES_LENGTH } from '../../constants';
-import { bytesEqual, swapEndianness, bytes2Hex, bytes2BinaryString } from '../utils';
-import { Bytes, IHash } from '../../types';
+import {
+  bytesEqual,
+  swapEndianness,
+  bytes2Hex,
+  bytes2BinaryString,
+  checkBigIntInField,
+  bigIntToUINT8Array
+} from '../utils';
+import { Bytes, IHash, Siblings } from '../../types';
+import { Hex, poseidon } from '@iden3/js-crypto';
 
 export class Hash implements IHash {
   // little endian
@@ -49,3 +57,56 @@ export class Hash implements IHash {
 }
 
 export const ZERO_HASH = new Hash();
+
+// returned bytes endianess will be big-endian
+export const newHashFromBigInt = (bigNum: bigint): Hash => {
+  if (!checkBigIntInField(bigNum)) {
+    throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
+  }
+
+  const bytes = bigIntToUINT8Array(bigNum);
+
+  const hash = new Hash();
+  hash.value = bytes;
+  return hash;
+};
+
+export const newHashFromHex = (h: string): Hash => {
+  if (!h) {
+    return ZERO_HASH;
+  }
+
+  // TODO: add in field check
+
+  const hash = new Hash();
+  hash.value = swapEndianness(Hex.decodeString(h));
+  return hash;
+};
+
+// return object of class Hash from a decimal string
+export const newHashFromString = (decimalString: string): Hash => {
+  const bigNum = BigInt(decimalString);
+
+  if (!checkBigIntInField(bigNum)) {
+    throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
+  }
+
+  return newHashFromBigInt(bigNum);
+};
+
+export const hashElems = (e: Array<bigint>): Hash => {
+  const hashBigInt = poseidon.hash(e);
+  return newHashFromBigInt(hashBigInt);
+};
+
+export const hashElemsKey = (k: bigint, e: Array<bigint>): Hash => {
+  const hashBigInt = poseidon.hash([...e, k]);
+  return newHashFromBigInt(hashBigInt);
+};
+
+export const circomSiblingsFromSiblings = (siblings: Siblings, levels: number): Siblings => {
+  for (let i = siblings.length; i < levels; i += 1) {
+    siblings.push(ZERO_HASH);
+  }
+  return siblings;
+};

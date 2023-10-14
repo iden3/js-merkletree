@@ -1,26 +1,18 @@
 import { UseStore, createStore, clear } from 'idb-keyval';
-import { IndexedDBStorage } from '../src/lib/db/indexedDB';
-import { HASH_BYTES_LENGTH } from '../src/constants';
+import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD } from '../src/constants';
 import { NodeMiddle } from '../src/lib/node/node';
-import { InMemoryDB, LocalStorageDB } from '../src/lib/db';
-import 'mock-local-storage';
-
-import {
-  bytes2Hex,
-  bytesEqual,
-  newHashFromBigInt,
-  siblignsFroomProof,
-  str2Bytes,
-  verifyProof
-} from '../src/lib/utils';
-import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
-
-import { Merkletree } from '../src/lib/merkletree/merkletree';
+import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
+import { bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
+import { Hash, ZERO_HASH, newHashFromBigInt } from '../src/lib/hash/hash';
+import { Merkletree, siblignsFroomProof, verifyProof } from '../src/lib/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
-import { MAX_NUM_IN_FIELD } from '../src/constants/field';
+
 import { expect } from 'chai';
 import { poseidon } from '@iden3/js-crypto';
+
+import 'mock-local-storage';
 import 'fake-indexeddb/auto';
+
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
   InMemoryDB = 'memoryStorage',
@@ -314,6 +306,7 @@ for (let index = 0; index < storages.length; index++) {
 
       for (let i = 8; i < 32; i += 1) {
         const { proof } = await mt.generateProof(BigInt(i));
+        expect(proof.existence).not.to.be.undefined;
       }
 
       // non-existence proof, empty aux

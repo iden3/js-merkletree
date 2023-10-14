@@ -1,5 +1,5 @@
 import { Bytes, Node, NodeType } from '../../types';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
 
 import {
   EMPTY_NODE_STRING,
@@ -9,7 +9,6 @@ import {
   NODE_TYPE_MIDDLE
 } from '../../constants';
 import { leafKey, nodeValue } from '../utils/node';
-import { hashElems } from '../utils';
 
 export class NodeLeaf implements Node {
   type: NodeType;
