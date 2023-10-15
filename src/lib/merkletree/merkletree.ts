@@ -1,19 +1,11 @@
 import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import { Hash, ZERO_HASH, circomSiblingsFromSiblings, newHashFromBigInt } from '../hash/hash';
 
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import {
-  bytesEqual,
-  checkEntryInField,
-  circomSiblingsFromSiblings,
-  getPath,
-  newHashFromBigInt,
-  setBitBigEndian
-} from '../utils';
+import { bytesEqual, getPath, setBitBigEndian } from '../utils';
 import { Siblings } from '../../types/merkletree';
-import { Entry } from '../../types/entry';
 import { checkBigIntInField } from '../utils/crypto';
 import { CircomProcessorProof, CircomVerifierProof } from './circom';
 import {
@@ -25,6 +17,7 @@ import {
   ErrReachedMaxLevel
 } from '../errors';
 import { Proof } from './proof';
+import { Entry, checkEntryInField } from '../entry';
 
 export class Merkletree {
   #db: ITreeStorage;

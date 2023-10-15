@@ -1,27 +1,14 @@
-import { Bytes } from '../../types';
 import { HASH_BYTES_LENGTH } from '../../constants';
+import { Bytes } from '../../types/bytes';
 import { checkBigIntInField } from './crypto';
 
 export const bytesEqual: (b1: Bytes, b2: Bytes) => boolean = (b1, b2) => {
-  let areEqual = true;
-  b1.forEach((ele, idx) => {
-    if (ele !== b2[idx]) {
-      areEqual = false;
-    }
-  });
-  return areEqual;
+  return b1.every((ele, idx) => ele === b2[idx]);
 };
 
 // TODO: might be make this generic over typed arrays?
 export const swapEndianness = (bytes: Bytes): Bytes => {
-  const tempBuffer = new ArrayBuffer(bytes.length);
-  const tempBytes = new Uint8Array(tempBuffer);
-
-  bytes.forEach((_, idx) => {
-    tempBytes[idx] = bytes[bytes.length - 1 - idx];
-  });
-
-  return tempBytes;
+  return bytes.slice().reverse();
 };
 
 export const bytes2BinaryString = (bytes: Bytes): string => {

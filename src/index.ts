@@ -1,3 +1,3 @@
-export * from './constants/index';
-export * from './lib/index';
-export * from './types/index';
+export * from './constants';
+export * from './lib';
+export * from './types';

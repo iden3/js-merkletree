@@ -1,6 +1,6 @@
 import { Node } from './node';
-import { Bytes } from './bytes';
 import { Hash } from '../lib/hash/hash';
+import { Bytes } from './bytes';
 
 export interface ITreeStorage {
   get: (k: Bytes) => Promise<Node | undefined>;

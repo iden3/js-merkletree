@@ -1,8 +1,6 @@
 // LeafKey computes the key of a leaf node given the hIndex and hValue of the
 // entry of the leaf.
-import { Hash } from '../hash/hash';
-
-import { hashElemsKey } from './poseidon';
+import { Hash, hashElemsKey } from '../hash/hash';
 
 import { NODE_VALUE_BYTE_ARR_LENGTH } from '../../constants';
 import { bigIntToUINT8Array } from './bigint';

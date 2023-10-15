@@ -1,8 +1,8 @@
 import { Data } from '../entry/data';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
+import { checkBigIntInField } from '../utils';
 
-import { elemBytesToBigInts, hashElems } from '../../lib/utils';
-import { ElemBytes } from '../../lib';
+import { ElemBytes } from './elemBytes';
 
 export class Entry {
   #data: Data;
@@ -61,3 +61,24 @@ export class Entry {
     return new Entry(this.#data);
   }
 }
+
+export const elemBytesToBigInts = (es: Array<ElemBytes>): Array<bigint> => {
+  const bigInts = es.map((e) => {
+    return e.bigInt();
+  });
+
+  return bigInts;
+};
+
+export const checkEntryInField = (e: Entry): boolean => {
+  const bigInts = elemBytesToBigInts(e.data.value);
+  let flag = true;
+
+  bigInts.forEach((b) => {
+    if (!checkBigIntInField(b)) {
+      flag = false;
+    }
+  });
+
+  return flag;
+};
