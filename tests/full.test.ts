@@ -1,10 +1,10 @@
 import { UseStore, createStore, clear } from 'idb-keyval';
 import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD } from '../src/constants';
-import { NodeMiddle } from '../src/lib/node/node';
+import { NodeLeaf, NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
-import { bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
+import { bigint2Array, bytes2BinaryString, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
 import { Hash, ZERO_HASH, newHashFromBigInt } from '../src/lib/hash/hash';
-import { Merkletree, siblignsFroomProof, verifyProof } from '../src/lib/merkletree';
+import { Merkletree, Proof, siblignsFroomProof, verifyProof } from '../src/lib/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 
 import { expect } from 'chai';
@@ -12,6 +12,9 @@ import { poseidon } from '@iden3/js-crypto';
 
 import 'mock-local-storage';
 import 'fake-indexeddb/auto';
+import { Node } from '../src/types';
+import { ffUtils } from '@iden3/js-crypto';
+import { nodeValue } from '../src/lib/utils/node';
 
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
@@ -634,6 +637,44 @@ for (let index = 0; index < storages.length; index++) {
       });
     });
 
+    it('expect tree.walk does not produce infinite loop', async () => {
+
+      const f = async (node: Node): Promise<void> => {
+
+        return Promise.resolve()
+      }
+      let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+
+      for (let i = 0; i < 5; i++) {
+        await tree.add(BigInt(i), BigInt(i))
+      }
+
+      await tree.walk(await tree.root(), (node: Node) => f(node));
+    });
+
+    it('proof stringify', async () => {
+      
+    
+        let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+    
+        for (let i = 0; i < 5; i++) {
+            await tree.add(BigInt(i), BigInt(i))
+        }
+
+        const {proof, value} =  await tree.generateProof(BigInt(9))
+        
+        const proofModel = JSON.stringify(proof);
+
+        const proofFromJSON = Proof.fromJSON(JSON.parse(proofModel))
+
+        expect(JSON.stringify(proof.allSiblings())).to.equal(JSON.stringify((proofFromJSON.allSiblings())));
+        expect(proof.existence).to.eq(proofFromJSON.existence);
+        expect(proof.existence).to.eq(false);
+        expect(JSON.stringify(proof.nodeAux)).to.eq(JSON.stringify(proofFromJSON.nodeAux));
+
+
+    });
+
     it('test smt verifier', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 4);
@@ -680,3 +721,4 @@ for (let index = 0; index < storages.length; index++) {
     });
   });
 }
+

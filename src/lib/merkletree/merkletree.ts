@@ -4,8 +4,8 @@ import { Hash, ZERO_HASH, circomSiblingsFromSiblings, newHashFromBigInt } from '
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import { bytesEqual, getPath, setBitBigEndian } from '../utils';
-import { Siblings } from '../../types/merkletree';
+import { bytesEqual, getPath } from '../utils';
+import { NodeAux, Siblings } from '../../types/merkletree';
 import { checkBigIntInField } from '../utils/crypto';
 import { CircomProcessorProof, CircomVerifierProof } from './circom';
 import {
@@ -442,8 +442,8 @@ export class Merkletree {
         break;
       case NODE_TYPE_MIDDLE:
         await f(n);
-        await this.walk((n as NodeMiddle).childL, f);
-        await this.walk((n as NodeMiddle).childR, f);
+        await this.recWalk((n as NodeMiddle).childL, f);
+        await this.recWalk((n as NodeMiddle).childR, f);
         break;
       default:
         throw ErrInvalidNodeFound;
@@ -454,7 +454,7 @@ export class Merkletree {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = await this.root();
     }
-    await this.walk(rootKey, f);
+    await this.recWalk(rootKey, f);
   }
 
   async generateCircomVerifierProof(k: bigint, rootKey: Hash): Promise<CircomVerifierProof> {
@@ -471,7 +471,7 @@ export class Merkletree {
     const { proof, value } = await this.generateProof(k, rootKey);
     const cp = new CircomVerifierProof();
     cp.root = rootKey;
-    cp.siblings = proof.siblings;
+    cp.siblings = proof.allSiblings();
     if (typeof proof.nodeAux !== 'undefined') {
       cp.oldKey = proof.nodeAux.key;
       cp.oldValue = proof.nodeAux.value;
@@ -492,7 +492,6 @@ export class Merkletree {
   }
 
   async generateProof(k: bigint, rootKey?: Hash): Promise<{ proof: Proof; value: bigint }> {
-    const p = new Proof();
     let siblingKey: Hash;
 
     const kHash = newHashFromBigInt(k);
@@ -502,26 +501,53 @@ export class Merkletree {
     }
     let nextKey = rootKey;
 
-    for (p.depth = 0; p.depth < this.maxLevels; p.depth += 1) {
+    let depth = 0;
+    let existence = false;
+    const siblings: Siblings = [];
+    let nodeAux: NodeAux | undefined;
+
+    for (depth = 0; depth < this.maxLevels; depth += 1) {
       const n = await this.getNode(nextKey);
       if (typeof n === 'undefined') {
         throw ErrNotFound;
       }
       switch (n.type) {
         case NODE_TYPE_EMPTY:
-          return { proof: p, value: BigInt('0') };
+          return {
+            proof: Proof.fromJSON({
+              existence,
+              siblings,
+              nodeAux
+            }),
+            value: BigInt('0')
+          };
         case NODE_TYPE_LEAF:
           if (bytesEqual(kHash.value, (n as NodeLeaf).entry[0].value)) {
-            p.existence = true;
-            return { proof: p, value: (n as NodeLeaf).entry[1].bigInt() };
+            existence = true;
+
+            return {
+              proof: Proof.fromJSON({
+                existence,
+                siblings,
+                nodeAux
+              }),
+              value: (n as NodeLeaf).entry[1].bigInt()
+            };
           }
-          p.nodeAux = {
+          nodeAux = {
             key: (n as NodeLeaf).entry[0],
             value: (n as NodeLeaf).entry[1]
           };
-          return { proof: p, value: (n as NodeLeaf).entry[1].bigInt() };
+          return {
+            proof: Proof.fromJSON({
+              existence,
+              siblings,
+              nodeAux
+            }),
+            value: (n as NodeLeaf).entry[1].bigInt()
+          };
         case NODE_TYPE_MIDDLE:
-          if (path[p.depth]) {
+          if (path[depth]) {
             nextKey = (n as NodeMiddle).childR;
             siblingKey = (n as NodeMiddle).childL;
           } else {
@@ -532,11 +558,7 @@ export class Merkletree {
         default:
           throw ErrInvalidNodeFound;
       }
-
-      if (!bytesEqual(siblingKey.value, ZERO_HASH.value)) {
-        setBitBigEndian(p.notEmpties, p.depth);
-        p.siblings.push(siblingKey);
-      }
+      siblings.push(siblingKey);
     }
     throw ErrKeyNotFound;
   }
