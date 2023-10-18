@@ -9,8 +9,13 @@ import { Bytes } from '../../types';
 
 export interface ProofJSON {
   existence: boolean;
-  siblings: Siblings;
-  nodeAux: NodeAux | undefined;
+  siblings: string[];
+  nodeAux: NodeAuxJSON | undefined;
+}
+
+export interface NodeAuxJSON {
+  key: string;
+  value: string;
 }
 
 export class Proof {
@@ -21,13 +26,14 @@ export class Proof {
   private siblings: Siblings;
   nodeAux: NodeAux | undefined;
 
-  constructor() {
-    this.existence = false;
-    this.depth = 0;
-    this.siblings = [];
+  constructor(obj?: { siblings: Siblings; nodeAux: NodeAux | undefined; existence: boolean }) {
+    this.existence = obj?.existence ?? false;
+    this.depth = obj?.siblings.length ?? 0;
+    this.nodeAux = obj?.nodeAux;
 
-    const arrBuff = new ArrayBuffer(NOT_EMPTIES_LEN);
-    this.notEmpties = new Uint8Array(arrBuff);
+    const { siblings, notEmpties } = this.reduceSiblings(obj?.siblings);
+    this.siblings = siblings;
+    this.notEmpties = notEmpties;
   }
 
   bytes(): Bytes {
@@ -56,29 +62,49 @@ export class Proof {
     return bs;
   }
 
-  toJSON(): ProofJSON {
+  toJSON() {
     return {
       existence: this.existence,
-      siblings: this.allSiblings(),
+      siblings: this.allSiblings().map((s) => s.toJSON()),
       nodeAux: this.nodeAux
+        ? {
+          key: this.nodeAux.key.toJSON(),
+          value: this.nodeAux.value.toJSON()
+        }
+        : undefined
     };
   }
 
-  public static fromJSON(obj: ProofJSON): Proof {
-    const proof = new Proof();
+  private reduceSiblings(siblings?: Siblings): { notEmpties: Uint8Array; siblings: Siblings } {
+    const reducedSiblings: Siblings = [];
+    const notEmpties = new Uint8Array(NOT_EMPTIES_LEN);
 
-    proof.existence = obj.existence;
-    proof.nodeAux = obj.nodeAux;
-    proof.depth = obj.siblings.length;
-
-    for (let i = 0; i < obj.siblings.length; i++) {
-      const sibling = obj.siblings[i];
-      if (JSON.stringify(obj.siblings[i]) !== JSON.stringify(ZERO_HASH)) {
-        setBitBigEndian(proof.notEmpties, i);
-        proof.siblings.push(sibling);
+    if (!siblings) {
+      return { siblings: reducedSiblings, notEmpties };
+    }
+    for (let i = 0; i < siblings.length; i++) {
+      const sibling = siblings[i];
+      if (JSON.stringify(siblings[i]) !== JSON.stringify(ZERO_HASH)) {
+        setBitBigEndian(notEmpties, i);
+        reducedSiblings.push(sibling);
       }
     }
-    return proof;
+    return { notEmpties, siblings: reducedSiblings };
+  }
+
+  public static fromJSON(obj: ProofJSON): Proof {
+    let nodeAux: NodeAux | undefined = undefined;
+    if (obj.nodeAux) {
+      nodeAux = {
+        key: Hash.fromJSON(obj.nodeAux.key),
+        value: Hash.fromJSON(obj.nodeAux.value)
+      };
+    }
+    const existence = obj.existence ?? false;
+
+    const siblings: Siblings = obj.siblings.map((s) => Hash.fromJSON(s));
+
+    return new Proof({ existence, nodeAux, siblings });
   }
 
   allSiblings(): Siblings {

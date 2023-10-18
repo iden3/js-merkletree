@@ -514,10 +514,10 @@ export class Merkletree {
       switch (n.type) {
         case NODE_TYPE_EMPTY:
           return {
-            proof: Proof.fromJSON({
+            proof: new Proof({
               existence,
-              siblings,
-              nodeAux
+              nodeAux,
+              siblings
             }),
             value: BigInt('0')
           };
@@ -526,10 +526,10 @@ export class Merkletree {
             existence = true;
 
             return {
-              proof: Proof.fromJSON({
+              proof: new Proof({
                 existence,
-                siblings,
-                nodeAux
+                nodeAux,
+                siblings
               }),
               value: (n as NodeLeaf).entry[1].bigInt()
             };
@@ -539,10 +539,10 @@ export class Merkletree {
             value: (n as NodeLeaf).entry[1]
           };
           return {
-            proof: Proof.fromJSON({
+            proof: new Proof({
               existence,
-              siblings,
-              nodeAux
+              nodeAux,
+              siblings
             }),
             value: (n as NodeLeaf).entry[1].bigInt()
           };

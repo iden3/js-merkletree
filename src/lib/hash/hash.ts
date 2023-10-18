@@ -54,6 +54,13 @@ export class Hash implements IHash {
     const bytes = swapEndianness(this.value);
     return BigInt(bytes2BinaryString(bytes));
   }
+
+  toJSON(): string {
+    return this.bigInt().toString();
+  }
+  static fromJSON(s: string): Hash {
+    return newHashFromBigInt(BigInt(s))
+  }
 }
 
 export const ZERO_HASH = new Hash();
