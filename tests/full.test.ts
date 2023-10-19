@@ -1,9 +1,9 @@
 import { UseStore, createStore, clear } from 'idb-keyval';
 import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD } from '../src/constants';
-import { NodeLeaf, NodeMiddle } from '../src/lib/node/node';
+import {  NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
-import { bigIntToUINT8Array, bigint2Array, bytes2BinaryString, bytes2Hex, bytesEqual, newBigIntFromBytes, str2Bytes } from '../src/lib/utils';
-import { Hash, ZERO_HASH, newHashFromBigInt } from '../src/lib/hash/hash';
+import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
+import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
 import { Merkletree, Proof, siblignsFroomProof, verifyProof } from '../src/lib/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 
@@ -13,10 +13,7 @@ import { poseidon } from '@iden3/js-crypto';
 import 'mock-local-storage';
 import 'fake-indexeddb/auto';
 import { Node } from '../src/types';
-import { ffUtils } from '@iden3/js-crypto';
-import { nodeValue } from '../src/lib/utils/node';
 
-import {writeFileSync} from "fs"
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
   InMemoryDB = 'memoryStorage',
@@ -351,8 +348,8 @@ for (let index = 0; index < storages.length; index++) {
       expect(proof.existence).to.be.true;
       proof.existence = false;
       proof.nodeAux = {
-        key: newHashFromBigInt(BigInt('4')),
-        value: newHashFromBigInt(BigInt('4'))
+        key: Hash.fromBigInt(BigInt('4')),
+        value: Hash.fromBigInt(BigInt('4'))
       };
 
       expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'))).to.be.false;
@@ -694,6 +691,9 @@ for (let index = 0; index < storages.length; index++) {
       expect(JSON.stringify(hash.bytes)).to.equal(JSON.stringify(bytes))
       expect(hash.toJSON()).to.equal(hash2.bigInt().toString())
       expect(hash.bytes).to.deep.equal(hash2.bytes);
+
+      expect(hash.hex()).to.equal(Hash.fromHex(hash2.hex()).hex())
+
     });
     it('test smt verifier', async () => {
       const sto = getTreeStorage();

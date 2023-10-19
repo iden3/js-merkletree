@@ -57,13 +57,26 @@ export class Hash implements IHash {
 
   static fromString(s: string): Hash {
     try {
-      return newHashFromBigInt(BigInt(s))
+      return Hash.fromBigInt(BigInt(s));
     }
     catch (e) {
       const deserializedHash = JSON.parse(s);
       const bytes = Uint8Array.from(Object.values(deserializedHash.bytes));
       return new Hash(bytes);
     }
+  }
+  static fromBigInt(i: bigint):Hash {
+    if (!checkBigIntInField(i)) {
+      throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
+    }
+  
+    const bytes = bigIntToUINT8Array(i);
+  
+    return new Hash(swapEndianness(bytes));
+  }
+
+  static fromHex(h: string): Hash {
+    return new Hash(Hex.decodeString(h));
   }
 
   toJSON() {
@@ -73,50 +86,38 @@ export class Hash implements IHash {
 
 export const ZERO_HASH = new Hash();
 
-// returned bytes endianess will be big-endian
+/**
+ * @deprecated The method should not be used and will be removed in the next major version,
+ * please use Hash.fromBigInt instead
+ */
 export const newHashFromBigInt = (bigNum: bigint): Hash => {
-  if (!checkBigIntInField(bigNum)) {
-    throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
-  }
-
-  const bytes = bigIntToUINT8Array(bigNum);
-
-  const hash = new Hash();
-  hash.value = bytes;
-  return hash;
+  return Hash.fromBigInt(bigNum);
 };
 
+/**
+ * @deprecated The method should not be used and will be removed in the next major version,
+ * please use Hash.fromBigInt instead
+ */
 export const newHashFromHex = (h: string): Hash => {
-  if (!h) {
-    return ZERO_HASH;
-  }
-
-  // TODO: add in field check
-
-  const hash = new Hash();
-  hash.value = swapEndianness(Hex.decodeString(h));
-  return hash;
+  return Hash.fromHex(h)
 };
 
-// return object of class Hash from a decimal string
+/**
+ * @deprecated The method should not be used and will be removed in the next major version,
+ * please use Hash.fromBigString instead
+ */
 export const newHashFromString = (decimalString: string): Hash => {
-  const bigNum = BigInt(decimalString);
-
-  if (!checkBigIntInField(bigNum)) {
-    throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
-  }
-
-  return newHashFromBigInt(bigNum);
+  return Hash.fromString(decimalString);
 };
 
 export const hashElems = (e: Array<bigint>): Hash => {
   const hashBigInt = poseidon.hash(e);
-  return newHashFromBigInt(hashBigInt);
+  return Hash.fromBigInt(hashBigInt);
 };
 
 export const hashElemsKey = (k: bigint, e: Array<bigint>): Hash => {
   const hashBigInt = poseidon.hash([...e, k]);
-  return newHashFromBigInt(hashBigInt);
+  return Hash.fromBigInt(hashBigInt);
 };
 
 export const circomSiblingsFromSiblings = (siblings: Siblings, levels: number): Siblings => {

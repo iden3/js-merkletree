@@ -1,7 +1,7 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
 import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
 import { bytesEqual, getPath, setBitBigEndian, siblings2Bytes, testBitBigEndian } from '../utils';
-import { Hash, ZERO_HASH, newHashFromBigInt } from '../hash/hash';
+import { Hash, ZERO_HASH } from '../hash/hash';
 import { NodeMiddle } from '../node/node';
 import { leafKey } from '../utils/node';
 import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
@@ -150,8 +150,8 @@ export const verifyProof = async (
 };
 
 export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise<Hash> => {
-  const kHash = newHashFromBigInt(k);
-  const vHash = newHashFromBigInt(v);
+  const kHash = Hash.fromBigInt(k);
+  const vHash = Hash.fromBigInt(v);
   let midKey: Hash;
 
   if (proof.existence) {

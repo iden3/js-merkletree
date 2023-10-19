@@ -1,5 +1,5 @@
 import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH, circomSiblingsFromSiblings, newHashFromBigInt } from '../hash/hash';
+import { Hash, ZERO_HASH, circomSiblingsFromSiblings } from '../hash/hash';
 
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
@@ -48,8 +48,8 @@ export class Merkletree {
     }
 
     this.#root = await this.root();
-    const kHash = newHashFromBigInt(k);
-    const vHash = newHashFromBigInt(v);
+    const kHash = Hash.fromBigInt(k);
+    const vHash = Hash.fromBigInt(v);
 
     const newNodeLeaf = new NodeLeaf(kHash, vHash);
     const path = getPath(this.maxLevels, kHash.value);
@@ -193,7 +193,7 @@ export class Merkletree {
   }
 
   async get(k: bigint): Promise<{ key: bigint; value: bigint; siblings: Siblings }> {
-    const kHash = newHashFromBigInt(k);
+    const kHash = Hash.fromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
     let nextKey = await this.root();
@@ -254,8 +254,8 @@ export class Merkletree {
       throw 'key not inside the finite field';
     }
 
-    const kHash = newHashFromBigInt(k);
-    const vHash = newHashFromBigInt(v);
+    const kHash = Hash.fromBigInt(k);
+    const vHash = Hash.fromBigInt(v);
 
     const path = getPath(this.maxLevels, kHash.value);
 
@@ -352,7 +352,7 @@ export class Merkletree {
       throw ErrNotWritable;
     }
 
-    const kHash = newHashFromBigInt(k);
+    const kHash = Hash.fromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
     let nextKey = this.#root;
@@ -479,8 +479,8 @@ export class Merkletree {
       cp.oldKey = ZERO_HASH;
       cp.oldValue = ZERO_HASH;
     }
-    cp.key = newHashFromBigInt(k);
-    cp.value = newHashFromBigInt(value);
+    cp.key = Hash.fromBigInt(k);
+    cp.value = Hash.fromBigInt(value);
 
     if (proof.existence) {
       cp.fnc = 0;
@@ -494,7 +494,7 @@ export class Merkletree {
   async generateProof(k: bigint, rootKey?: Hash): Promise<{ proof: Proof; value: bigint }> {
     let siblingKey: Hash;
 
-    const kHash = newHashFromBigInt(k);
+    const kHash = Hash.fromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
     if (!rootKey) {
       rootKey = await this.root();
@@ -585,8 +585,8 @@ export class Merkletree {
       throw 'key/value undefined';
     }
 
-    cp.oldKey = newHashFromBigInt(key);
-    cp.oldValue = newHashFromBigInt(value);
+    cp.oldKey = Hash.fromBigInt(key);
+    cp.oldValue = Hash.fromBigInt(value);
 
     if (bytesEqual(cp.oldKey.value, ZERO_HASH.value)) {
       cp.isOld0 = true;
@@ -595,8 +595,8 @@ export class Merkletree {
     cp.siblings = circomSiblingsFromSiblings(siblings, this.maxLevels);
     await this.add(k, v);
 
-    cp.newKey = newHashFromBigInt(k);
-    cp.newValue = newHashFromBigInt(v);
+    cp.newKey = Hash.fromBigInt(k);
+    cp.newValue = Hash.fromBigInt(v);
     cp.newRoot = await this.root();
 
     return cp;
