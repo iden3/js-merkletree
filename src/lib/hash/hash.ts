@@ -55,9 +55,6 @@ export class Hash implements IHash {
     return BigInt(bytes2BinaryString(bytes));
   }
 
-  toString() {
-    return this.bigInt().toString();
-  }
   static fromString(s: string): Hash {
     try {
       return newHashFromBigInt(BigInt(s))
