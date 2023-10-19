@@ -55,11 +55,22 @@ export class Hash implements IHash {
     return BigInt(bytes2BinaryString(bytes));
   }
 
-  toJSON(): string {
+  toString() {
     return this.bigInt().toString();
   }
-  static fromJSON(s: string): Hash {
-    return newHashFromBigInt(BigInt(s))
+  static fromString(s: string): Hash {
+    try {
+      return newHashFromBigInt(BigInt(s))
+    }
+    catch (e) {
+      const deserializedHash = JSON.parse(s);
+      const bytes = Uint8Array.from(Object.values(deserializedHash.bytes));
+      return new Hash(bytes);
+    }
+  }
+
+  toJSON() {
+    return this.toString();
   }
 }
 
