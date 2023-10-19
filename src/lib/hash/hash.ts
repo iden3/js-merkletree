@@ -67,7 +67,7 @@ export class Hash implements IHash {
   }
 
   toJSON() {
-    return this.toString();
+    return this.string();
   }
 }
 
