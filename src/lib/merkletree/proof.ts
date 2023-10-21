@@ -1,27 +1,39 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
 import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
-import { bytesEqual, getPath, siblings2Bytes, testBitBigEndian } from '../utils';
-import { Hash, ZERO_HASH, newHashFromBigInt } from '../hash/hash';
+import { bytesEqual, getPath, setBitBigEndian, siblings2Bytes, testBitBigEndian } from '../utils';
+import { Hash, ZERO_HASH } from '../hash/hash';
 import { NodeMiddle } from '../node/node';
 import { leafKey } from '../utils/node';
 import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
 import { Bytes } from '../../types';
 
+export interface ProofJSON {
+  existence: boolean;
+  siblings: string[];
+  nodeAux: NodeAuxJSON | undefined;
+}
+
+export interface NodeAuxJSON {
+  key: string;
+  value: string;
+}
+
 export class Proof {
   existence: boolean;
-  depth: number;
+  private depth: number;
   // notempties is a bitmap of non-empty siblings found in siblings
-  notEmpties: Bytes;
-  siblings: Siblings;
+  private notEmpties: Bytes;
+  private siblings: Siblings;
   nodeAux: NodeAux | undefined;
 
-  constructor() {
-    this.existence = false;
-    this.depth = 0;
-    this.siblings = [];
+  constructor(obj?: { siblings: Siblings; nodeAux: NodeAux | undefined; existence: boolean }) {
+    this.existence = obj?.existence ?? false;
+    this.depth = obj?.siblings.length ?? 0;
+    this.nodeAux = obj?.nodeAux;
 
-    const arrBuff = new ArrayBuffer(NOT_EMPTIES_LEN);
-    this.notEmpties = new Uint8Array(arrBuff);
+    const { siblings, notEmpties } = this.reduceSiblings(obj?.siblings);
+    this.siblings = siblings;
+    this.notEmpties = notEmpties;
   }
 
   bytes(): Bytes {
@@ -50,25 +62,76 @@ export class Proof {
     return bs;
   }
 
+  toJSON() {
+    return {
+      existence: this.existence,
+      siblings: this.allSiblings().map((s) => s.toJSON()),
+      nodeAux: this.nodeAux
+        ? {
+            key: this.nodeAux.key.toJSON(),
+            value: this.nodeAux.value.toJSON()
+          }
+        : undefined
+    };
+  }
+
+  private reduceSiblings(siblings?: Siblings): { notEmpties: Uint8Array; siblings: Siblings } {
+    const reducedSiblings: Siblings = [];
+    const notEmpties = new Uint8Array(NOT_EMPTIES_LEN);
+
+    if (!siblings) {
+      return { siblings: reducedSiblings, notEmpties };
+    }
+    for (let i = 0; i < siblings.length; i++) {
+      const sibling = siblings[i];
+      if (JSON.stringify(siblings[i]) !== JSON.stringify(ZERO_HASH)) {
+        setBitBigEndian(notEmpties, i);
+        reducedSiblings.push(sibling);
+      }
+    }
+    return { notEmpties, siblings: reducedSiblings };
+  }
+
+  public static fromJSON(obj: ProofJSON): Proof {
+    let nodeAux: NodeAux | undefined = undefined;
+    if (obj.nodeAux) {
+      nodeAux = {
+        key: Hash.fromString(obj.nodeAux.key),
+        value: Hash.fromString(obj.nodeAux.value)
+      };
+    }
+    const existence = obj.existence ?? false;
+
+    const siblings: Siblings = obj.siblings.map((s) =>
+      typeof s === 'string' ? Hash.fromString(s) : new Hash(s)
+    );
+
+    return new Proof({ existence, nodeAux, siblings });
+  }
+
   allSiblings(): Siblings {
-    return siblignsFroomProof(this);
+    let sibIdx = 0;
+    const siblings: Siblings = [];
+
+    for (let i = 0; i < this.depth; i += 1) {
+      if (testBitBigEndian(this.notEmpties, i)) {
+        siblings.push(this.siblings[sibIdx]);
+        sibIdx += 1;
+      } else {
+        siblings.push(ZERO_HASH);
+      }
+    }
+
+    return siblings;
   }
 }
 
+/**
+ * @deprecated The method should not be used and will be removed in the next major version,
+ * please use proof.allSiblings instead
+ */
 export const siblignsFroomProof = (proof: Proof): Siblings => {
-  let sibIdx = 0;
-  const siblings: Siblings = [];
-
-  for (let i = 0; i < proof.depth; i += 1) {
-    if (testBitBigEndian(proof.notEmpties, i)) {
-      siblings.push(proof.siblings[sibIdx]);
-      sibIdx += 1;
-    } else {
-      siblings.push(ZERO_HASH);
-    }
-  }
-
-  return siblings;
+  return proof.allSiblings();
 };
 
 export const verifyProof = async (
@@ -89,10 +152,8 @@ export const verifyProof = async (
 };
 
 export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise<Hash> => {
-  const kHash = newHashFromBigInt(k);
-  const vHash = newHashFromBigInt(v);
-
-  let sibIdx = proof.siblings.length - 1;
+  const kHash = Hash.fromBigInt(k);
+  const vHash = Hash.fromBigInt(v);
   let midKey: Hash;
 
   if (proof.existence) {
@@ -109,20 +170,15 @@ export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise
     }
   }
 
-  const path = getPath(proof.depth, kHash.value);
-  let siblingKey: Hash;
+  const siblings = proof.allSiblings();
 
-  for (let i = proof.depth - 1; i >= 0; i -= 1) {
-    if (testBitBigEndian(proof.notEmpties, i)) {
-      siblingKey = proof.siblings[sibIdx];
-      sibIdx -= 1;
-    } else {
-      siblingKey = ZERO_HASH;
-    }
+  const path = getPath(siblings.length, kHash.value);
+
+  for (let i = siblings.length - 1; i >= 0; i -= 1) {
     if (path[i]) {
-      midKey = await new NodeMiddle(siblingKey, midKey).getKey();
+      midKey = await new NodeMiddle(siblings[i], midKey).getKey();
     } else {
-      midKey = await new NodeMiddle(midKey, siblingKey).getKey();
+      midKey = await new NodeMiddle(midKey, siblings[i]).getKey();
     }
   }
 
