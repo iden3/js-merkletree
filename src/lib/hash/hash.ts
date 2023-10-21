@@ -66,7 +66,7 @@ export class Hash implements IHash {
   }
   static fromBigInt(i: bigint): Hash {
     if (!checkBigIntInField(i)) {
-      throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
+      throw new Error('NewBigIntFromHashBytes: Value not inside the Finite Field')
     }
 
     const bytes = bigIntToUINT8Array(i);
