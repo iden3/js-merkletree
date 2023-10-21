@@ -65,17 +65,20 @@ export class Hash implements IHash {
       return new Hash(bytes);
     }
   }
-  static fromBigInt(i: bigint):Hash {
+  static fromBigInt(i: bigint): Hash {
     if (!checkBigIntInField(i)) {
       throw 'NewBigIntFromHashBytes: Value not inside the Finite Field';
     }
-  
+
     const bytes = bigIntToUINT8Array(i);
-  
+
     return new Hash(swapEndianness(bytes));
   }
 
-  static fromHex(h: string): Hash {
+  static fromHex(h: string | undefined): Hash {
+    if (!h) {
+      return ZERO_HASH
+    }
     return new Hash(Hex.decodeString(h));
   }
 
