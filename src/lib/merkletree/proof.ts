@@ -65,12 +65,12 @@ export class Proof {
   toJSON() {
     return {
       existence: this.existence,
-      siblings: this.allSiblings().map(s => s.toJSON()),
+      siblings: this.allSiblings().map((s) => s.toJSON()),
       nodeAux: this.nodeAux
         ? {
-          key: this.nodeAux.key.toJSON(),
-          value: this.nodeAux.value.toJSON(),
-        }
+            key: this.nodeAux.key.toJSON(),
+            value: this.nodeAux.value.toJSON()
+          }
         : undefined
     };
   }
@@ -102,8 +102,8 @@ export class Proof {
     }
     const existence = obj.existence ?? false;
 
-    const siblings: Siblings = obj.siblings.map((s) => 
-       typeof s === "string" ? Hash.fromString(s) : new Hash(s)
+    const siblings: Siblings = obj.siblings.map((s) =>
+      typeof s === 'string' ? Hash.fromString(s) : new Hash(s)
     );
 
     return new Proof({ existence, nodeAux, siblings });

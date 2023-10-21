@@ -58,8 +58,7 @@ export class Hash implements IHash {
   static fromString(s: string): Hash {
     try {
       return Hash.fromBigInt(BigInt(s));
-    }
-    catch (e) {
+    } catch (e) {
       const deserializedHash = JSON.parse(s);
       const bytes = Uint8Array.from(Object.values(deserializedHash.bytes));
       return new Hash(bytes);
@@ -77,7 +76,7 @@ export class Hash implements IHash {
 
   static fromHex(h: string | undefined): Hash {
     if (!h) {
-      return ZERO_HASH
+      return ZERO_HASH;
     }
     return new Hash(Hex.decodeString(h));
   }
@@ -102,7 +101,7 @@ export const newHashFromBigInt = (bigNum: bigint): Hash => {
  * please use Hash.fromBigInt instead
  */
 export const newHashFromHex = (h: string): Hash => {
-  return Hash.fromHex(h)
+  return Hash.fromHex(h);
 };
 
 /**

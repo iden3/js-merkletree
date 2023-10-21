@@ -1,6 +1,6 @@
 import { UseStore, createStore, clear } from 'idb-keyval';
 import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD } from '../src/constants';
-import {  NodeMiddle } from '../src/lib/node/node';
+import { NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
 import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
 import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
@@ -636,41 +636,37 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     it('expect tree.walk does not produce infinite loop', async () => {
-
       const f = async (node: Node): Promise<void> => {
-
-        return Promise.resolve()
-      }
+        return Promise.resolve();
+      };
       let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
-        await tree.add(BigInt(i), BigInt(i))
+        await tree.add(BigInt(i), BigInt(i));
       }
 
       await tree.walk(await tree.root(), (node: Node) => f(node));
     });
 
     it('proof stringify', async () => {
-
-
       let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
-        await tree.add(BigInt(i), BigInt(i))
+        await tree.add(BigInt(i), BigInt(i));
       }
 
-      const { proof, value } = await tree.generateProof(BigInt(9))
+      const { proof, value } = await tree.generateProof(BigInt(9));
 
       const proofModel = JSON.stringify(proof);
 
-      const proofFromJSON = Proof.fromJSON(JSON.parse(proofModel))
+      const proofFromJSON = Proof.fromJSON(JSON.parse(proofModel));
 
-      expect(JSON.stringify(proof.allSiblings())).to.equal(JSON.stringify((proofFromJSON.allSiblings())));
+      expect(JSON.stringify(proof.allSiblings())).to.equal(
+        JSON.stringify(proofFromJSON.allSiblings())
+      );
       expect(proof.existence).to.eq(proofFromJSON.existence);
       expect(proof.existence).to.eq(false);
       expect(JSON.stringify(proof.nodeAux)).to.eq(JSON.stringify(proofFromJSON.nodeAux));
-
-
     });
     it('should deserialize Old Hash properly', async () => {
       const hash = new Hash(
@@ -685,15 +681,14 @@ for (let index = 0; index < storages.length; index++) {
       const deserializedHash = JSON.parse(oldSerializedHash);
       const bytes = Uint8Array.from(Object.values(deserializedHash.bytes));
       const hash2 = new Hash(bytes);
-      const hashFromOldStr = Hash.fromString(oldSerializedHash)
+      const hashFromOldStr = Hash.fromString(oldSerializedHash);
 
-      expect(JSON.stringify(hash)).to.equal(JSON.stringify(hashFromOldStr.bigInt().toString()))
-      expect(JSON.stringify(hash.bytes)).to.equal(JSON.stringify(bytes))
-      expect(hash.toJSON()).to.equal(hash2.bigInt().toString())
+      expect(JSON.stringify(hash)).to.equal(JSON.stringify(hashFromOldStr.bigInt().toString()));
+      expect(JSON.stringify(hash.bytes)).to.equal(JSON.stringify(bytes));
+      expect(hash.toJSON()).to.equal(hash2.bigInt().toString());
       expect(hash.bytes).to.deep.equal(hash2.bytes);
 
-      expect(hash.hex()).to.equal(Hash.fromHex(hash2.hex()).hex())
-
+      expect(hash.hex()).to.equal(Hash.fromHex(hash2.hex()).hex());
     });
     it('test smt verifier', async () => {
       const sto = getTreeStorage();
@@ -741,4 +736,3 @@ for (let index = 0; index < storages.length; index++) {
     });
   });
 }
-
