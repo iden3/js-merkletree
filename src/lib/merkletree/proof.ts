@@ -102,27 +102,32 @@ export class Proof {
     }
     const existence = obj.existence ?? false;
 
-    const siblings: Siblings = obj.siblings.map((s) =>
-      typeof s === 'string' ? Hash.fromString(s) : new Hash(s)
-    );
+    const siblings: Siblings = obj.siblings.map((s) => Hash.fromString(s));
 
     return new Proof({ existence, nodeAux, siblings });
   }
 
   allSiblings(): Siblings {
-    let sibIdx = 0;
-    const siblings: Siblings = [];
+    return Proof.buildAllSiblings(this.depth, this.notEmpties, this.siblings);
+  }
 
-    for (let i = 0; i < this.depth; i += 1) {
-      if (testBitBigEndian(this.notEmpties, i)) {
-        siblings.push(this.siblings[sibIdx]);
+  public static buildAllSiblings(
+    depth: number,
+    notEmpties: Uint8Array,
+    siblings: Hash[]
+  ): Siblings {
+    let sibIdx = 0;
+    const allSiblings: Siblings = [];
+
+    for (let i = 0; i < depth; i += 1) {
+      if (testBitBigEndian(notEmpties, i)) {
+        allSiblings.push(siblings[sibIdx]);
         sibIdx += 1;
       } else {
-        siblings.push(ZERO_HASH);
+        allSiblings.push(ZERO_HASH);
       }
     }
-
-    return siblings;
+    return allSiblings;
   }
 }
 
