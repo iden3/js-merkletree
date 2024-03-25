@@ -1,2 +1,23 @@
 # js-merkletree
-browser compatible SMT implemetation 
+
+A browsers compatible TypeScript implementation of a Merkle Tree data structure for efficient and secure data verification and storage. This library is developed and maintained by the Iden3 team
+
+## Installation
+
+```bash
+npm install @iden3/js-merkletree
+```
+
+For more detailed usage and examples, please refer to the documentation and tests.
+
+## Contributing
+
+We welcome contributions to the js-merkletree library.
+
+## License
+
+This project is licensed under the AGPL-3.0 License.
+
+## Acknowledgments
+
+This library is developed and maintained by the Iden3 team as part of their effort to build a decentralized, privacy-preserving identity management system. Special thanks to all the contributors and the open-source community for their support.
