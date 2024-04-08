@@ -44,7 +44,6 @@
   },
   "homepage": "https://github.com/iden3/js-merkletree#readme",
   "scripts": {
-    "lint": "eslint --fix --ext .js,.ts src/**",
     "clean": "rimraf ./dist",
     "build": "npm run clean && npm run build:node && npm run build:browser",
     "build:node": "npm run build:tsc && npm run build:esm",
@@ -52,7 +51,10 @@
     "build:browser": "rollup -c config/rollup.config.mjs",
     "build:tsc": "tsc --module commonjs --outDir dist/node/cjs",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register --timeout 300000 --require mock-local-storage './tests/**/*.test.ts'",
+    "lint": "eslint --fix --ext .js,.ts src/**",
+    "lint:check": "eslint --ext .js,.ts src/**",
     "format": "prettier --config .prettierrc './**/*.ts' --write",
+    "format:check": "prettier --config .prettierrc './**/*.ts' --check",
     "deps:check": "npx madge --circular --extensions ts ./"
   },
   "devDependencies": {
