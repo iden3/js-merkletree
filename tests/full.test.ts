@@ -310,12 +310,12 @@ for (let index = 0; index < storages.length; index++) {
         expect(proof.existence).not.to.be.undefined;
       }
 
-      // non-existence proof, empty aux
+      // non-existence proof, node aux
       proof = (await mt.generateProof(BigInt('12'))).proof;
       expect(proof.existence).to.be.false;
+      expect(proof.nodeAux).not.undefined;
       expect(await verifyProof(await mt.root(), proof, BigInt('12'), BigInt('0'))).to.be.true;
-      expect(
-        bytes2Hex(proof.bytes()),
+      expect(bytes2Hex(proof.bytes())).to.be.equal(
         '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df0604000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
       );
 
@@ -324,9 +324,8 @@ for (let index = 0; index < storages.length; index++) {
       expect(proof.existence).to.be.false;
       expect(proof.nodeAux).not.undefined;
       expect(await verifyProof(await mt.root(), proof, BigInt('10'), BigInt('0'))).to.be.true;
-      expect(
-        bytes2Hex(proof.bytes()),
-        '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df0604000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
+      expect(bytes2Hex(proof.bytes())).to.be.equal(
+        '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e4030acfcdd2617df9eb5aef744c5f2e03eb8c92c61f679007dc1f2707fd908ea41a9433745b469c101edca814c498e7f388100d497b24f1d2ac935bced3572f591d02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
       );
     });
 
