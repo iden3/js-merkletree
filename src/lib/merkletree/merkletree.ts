@@ -402,6 +402,24 @@ export class Merkletree {
       await this.#db.setRoot(this.#root);
     }
 
+    const nearestSibling = await this.#db.get(kHash.bytes);
+    if (nearestSibling?.type === NODE_TYPE_MIDDLE) {
+      let newNode: Node;
+      if (path[siblings.length - 1]) {
+        newNode = new NodeMiddle(toUpload, ZERO_HASH);
+      } else {
+        newNode = new NodeMiddle(ZERO_HASH, toUpload);
+      }
+      await this.addNode(newNode);
+      const newRootKey = await this.recalculatePathUntilRoot(
+        path,
+        newNode,
+        siblings.slice(0, siblings.length - 1)
+      );
+      this.#root = newRootKey;
+      await this.#db.setRoot(this.#root);
+    }
+
     for (let i = siblings.length - 2; i >= 0; i -= 1) {
       if (!bytesEqual(siblings[i].value, ZERO_HASH.value)) {
         let newNode: Node;

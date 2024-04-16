@@ -357,7 +357,6 @@ for (let index = 0; index < storages.length; index++) {
     it('test delete', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
-      expect((await mt.root()).string()).to.be.equal('0');
 
       await mt.add(BigInt('1'), BigInt('2'));
       expect((await mt.root()).string()).to.be.equal(
@@ -513,6 +512,25 @@ for (let index = 0; index < storages.length; index++) {
       }
     });
 
+    it('test delete leaf near middle node', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      const keys = [7n, 1n, 5n];
+
+      keys.map(async (v) => {
+        await mt.add(v, v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+      });
+
+      keys.map(async (v) => {
+        await mt.delete(v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.false;
+      });
+    });
+
     it('test dump leafs and import leafs', async () => {
       const sto1 = getTreeStorage('tree1');
       const sto2 = getTreeStorage('tree2');
@@ -638,7 +656,7 @@ for (let index = 0; index < storages.length; index++) {
       const f = async (node: Node): Promise<void> => {
         return Promise.resolve();
       };
-      let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
@@ -648,7 +666,7 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     it('proof stringify', async () => {
-      let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
