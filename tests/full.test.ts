@@ -702,6 +702,85 @@ for (let index = 0; index < storages.length; index++) {
       expect(rleaf.entry[0].bigInt()).to.be.eq(1n);
     });
 
+    // https://github.com/iden3/go-merkletree-sql/issues/23
+    it('test issue 23', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+
+      await mt.delete(7n);
+      await mt.add(7n, 7n);
+    });
+
+    it('test insert delete node right fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+
+      await mt.delete(7n);
+      await mt.add(7n, 7n);
+
+      const existProof = await mt.generateProof(7n);
+      expect(existProof.proof.existence).to.be.true;
+
+      await mt.update(7n, 100n);
+      const updatedNode = await mt.get(7n);
+      expect(updatedNode.key).to.be.eq(7n);
+      expect(updatedNode.value).to.be.eq(100n);
+    });
+
+    it('test insert delete node left fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(6n, 6n);
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+
+      await mt.delete(4n);
+      await mt.add(4n, 4n);
+
+      const existProof = await mt.generateProof(4n);
+      expect(existProof.proof.existence).to.be.true;
+
+      await mt.update(4n, 100n);
+      const updatedNode = await mt.get(4n);
+      expect(updatedNode.key).to.be.eq(4n);
+      expect(updatedNode.value).to.be.eq(100n);
+    });
+
+    it('test push leaf already exists right fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+      await mt.add(3n, 3n);
+
+      await mt.delete(3n);
+      await mt.add(3n, 3n);
+    });
+
+    it('test push leaf already exists left fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(6n, 6n);
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+      await mt.add(8n, 8n);
+
+      await mt.delete(8n);
+      await mt.add(8n, 8n);
+    });
+
     it('test dump leafs and import leafs', async () => {
       const sto1 = getTreeStorage('tree1');
       const sto2 = getTreeStorage('tree2');
