@@ -1,6 +1,6 @@
 import { UseStore, createStore, clear } from 'idb-keyval';
-import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD } from '../src/constants';
-import { NodeMiddle } from '../src/lib/node/node';
+import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD, NODE_TYPE_LEAF } from '../src/constants';
+import { NodeLeaf, NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
 import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
 import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
@@ -357,7 +357,6 @@ for (let index = 0; index < storages.length; index++) {
     it('test delete', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
-      expect((await mt.root()).string()).to.be.equal('0');
 
       await mt.add(BigInt('1'), BigInt('2'));
       expect((await mt.root()).string()).to.be.equal(
@@ -513,6 +512,196 @@ for (let index = 0; index < storages.length; index++) {
       }
     });
 
+    it('test delete leaf near middle node right fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      const keys = [7n, 1n, 5n];
+
+      keys.map(async (v) => {
+        await mt.add(v, v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+      });
+
+      keys.map(async (v) => {
+        await mt.delete(v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.false;
+      });
+    });
+
+    it('test delete leaf near middle node right fork deep', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      const keys = [3n, 7n, 15n];
+
+      keys.map(async (v) => {
+        await mt.add(v, v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+      });
+
+      keys.map(async (v) => {
+        await mt.delete(v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.false;
+      });
+    });
+
+    it('test delete leaf near middle node left fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      const keys = [6n, 4n, 2n];
+
+      keys.map(async (v) => {
+        await mt.add(v, v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+      });
+
+      keys.map(async (v) => {
+        await mt.delete(v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.false;
+      });
+    });
+
+    it('test delete leaf near middle node left fork deep', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      const keys = [4n, 8n, 16n];
+
+      keys.map(async (v) => {
+        await mt.add(v, v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+      });
+
+      keys.map(async (v) => {
+        await mt.delete(v);
+        const existProof = await mt.generateProof(v, await mt.root());
+        expect(existProof.proof.existence).to.be.false;
+      });
+    });
+
+    // Checking whether the last leaf will be moved to the root position
+    //
+    //	   root
+    //	 /     \
+    //	0    MiddleNode
+    //	      /   \
+    //	     01   11
+    //
+    // Up to:
+    //
+    //	root(11)
+    it('test up to root after delete right fork', async () => {
+      const sto = getTreeStorage('reght fork');
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(3n, 3n);
+
+      await mt.delete(1n);
+
+      const leaf = await mt.getNode(await mt.root());
+      expect(leaf?.type).to.be.eq(NODE_TYPE_LEAF);
+      expect((leaf as NodeLeaf).entry[0].bigInt()).to.be.eq(3n);
+    });
+
+    // Checking whether the last leaf will be moved to the root position
+    //
+    //		   root
+    //	 	 /      \
+    //		MiddleNode  0
+    //		 /   \
+    //		100  010
+    //
+    // Up to:
+    //
+    //	root(100)
+    it('test up to root after delete left fork', async () => {
+      const sto = getTreeStorage('left fork');
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+
+      await mt.delete(2n);
+
+      const leaf = await mt.getNode(await mt.root());
+      expect(leaf?.type).to.be.eq(NODE_TYPE_LEAF);
+      expect((leaf as NodeLeaf).entry[0].bigInt()).to.be.eq(4n);
+    });
+
+    // Checking whether the new root will be calculated from to leafs
+    //
+    //	  root
+    //	 /    \
+    //	10  MiddleNode
+    //	      /   \
+    //	     01   11
+    //
+    // Up to:
+    //
+    //	 root
+    //	 /  \
+    //	10  11
+    it('calculating of new root right fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(3n, 3n);
+      await mt.add(2n, 2n);
+
+      await mt.delete(1n);
+
+      const root = (await mt.getNode(await mt.root())) as NodeMiddle;
+
+      const lleaf = (await mt.getNode(root.childL)) as NodeLeaf;
+      const rleaf = (await mt.getNode(root.childR)) as NodeLeaf;
+
+      expect(lleaf.entry[0].bigInt()).to.be.eq(2n);
+      expect(rleaf.entry[0].bigInt()).to.be.eq(3n);
+    });
+
+    // Checking whether the new root will be calculated from to leafs
+    //
+    //	         root
+    //	       /     \
+    //	 MiddleNode  01
+    //	  /   \
+    //	100   010
+    //
+    // Up to:
+    //
+    //	  root
+    //	 /   \
+    //	100  001
+    it('calculating of new root left fork', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+
+      await mt.delete(2n);
+
+      const root = (await mt.getNode(await mt.root())) as NodeMiddle;
+
+      const lleaf = (await mt.getNode(root.childL)) as NodeLeaf;
+      const rleaf = (await mt.getNode(root.childR)) as NodeLeaf;
+
+      expect(lleaf.entry[0].bigInt()).to.be.eq(4n);
+      expect(rleaf.entry[0].bigInt()).to.be.eq(1n);
+    });
+
     it('test dump leafs and import leafs', async () => {
       const sto1 = getTreeStorage('tree1');
       const sto2 = getTreeStorage('tree2');
@@ -638,7 +827,7 @@ for (let index = 0; index < storages.length; index++) {
       const f = async (node: Node): Promise<void> => {
         return Promise.resolve();
       };
-      let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
@@ -648,7 +837,7 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     it('proof stringify', async () => {
-      let tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
