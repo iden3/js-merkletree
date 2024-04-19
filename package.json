@@ -38,7 +38,7 @@
     "url": "https://github.com/iden3/js-merkletree.git"
   },
   "author": "Iden3 Core team",
-  "license": "AGPL-3.0",
+  "license": "MIT or Apache-2.0",
   "bugs": {
     "url": "https://github.com/iden3/js-merkletree-core/issues"
   },
