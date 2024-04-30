@@ -512,80 +512,166 @@ for (let index = 0; index < storages.length; index++) {
       }
     });
 
-    it('test delete leaf near middle node right fork', async () => {
+    it('test delete leaf near middle node. Right branch', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
       const keys = [7n, 1n, 5n];
 
-      keys.map(async (v) => {
-        await mt.add(v, v);
-        const existProof = await mt.generateProof(v, await mt.root());
-        expect(existProof.proof.existence).to.be.true;
-      });
+      const expectedSiblings: { [id: string]: bigint[] } = {
+        '7': [],
+        '1': [0n, 3968539605503372859924195689353752825000692947459401078008697788408142999740n],
+        '5': [
+          0n,
+          3968539605503372859924195689353752825000692947459401078008697788408142999740n,
+          1243904711429961858774220647610724273798918457991486031567244100767259239747n
+        ]
+      };
 
-      keys.map(async (v) => {
-        await mt.delete(v);
-        const existProof = await mt.generateProof(v, await mt.root());
+      for (const k of keys) {
+        await mt.add(k, k);
+        const existProof = await mt.generateProof(k, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+        compareSiblings(expectedSiblings[k.toString()], existProof.proof);
+      }
+
+      const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
+        '7': [0n, 4274876798241152869364032215387952876266736406919374878317677138322903129320n],
+        '1': [],
+        '5': []
+      };
+
+      for (const k of keys) {
+        await mt.delete(k);
+        const existProof = await mt.generateProof(k, await mt.root());
         expect(existProof.proof.existence).to.be.false;
-      });
+        compareSiblings(expectedSiblingsNonExist[k.toString()], existProof.proof);
+      }
     });
 
-    it('test delete leaf near middle node right fork deep', async () => {
+    it('test delete leaf near middle node. Right branch deep', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
       const keys = [3n, 7n, 15n];
 
-      keys.map(async (v) => {
-        await mt.add(v, v);
-        const existProof = await mt.generateProof(v, await mt.root());
-        expect(existProof.proof.existence).to.be.true;
-      });
+      const expectedSiblings: { [id: string]: bigint[] } = {
+        '3': [],
+        '7': [
+          0n,
+          0n,
+          14218827602097913497782608311388761513660285528499590827800641410537362569671n
+        ],
+        '15': [
+          0n,
+          0n,
+          14218827602097913497782608311388761513660285528499590827800641410537362569671n,
+          3968539605503372859924195689353752825000692947459401078008697788408142999740n
+        ]
+      };
 
-      keys.map(async (v) => {
-        await mt.delete(v);
-        const existProof = await mt.generateProof(v, await mt.root());
+      for (const k of keys) {
+        await mt.add(k, k);
+        const existProof = await mt.generateProof(k, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+        compareSiblings(expectedSiblings[k.toString()], existProof.proof);
+      }
+
+      const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
+        '3': [
+          0n,
+          0n,
+          10179745751648650481317481301133564568831136415508833815669215270622331305772n
+        ],
+        '7': [],
+        '15': []
+      };
+
+      for (const k of keys) {
+        await mt.delete(k);
+        const existProof = await mt.generateProof(k, await mt.root());
         expect(existProof.proof.existence).to.be.false;
-      });
+        compareSiblings(expectedSiblingsNonExist[k.toString()], existProof.proof);
+      }
     });
 
-    it('test delete leaf near middle node left fork', async () => {
+    it('test delete leaf near middle node. Left branch', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
       const keys = [6n, 4n, 2n];
 
-      keys.map(async (v) => {
-        await mt.add(v, v);
-        const existProof = await mt.generateProof(v, await mt.root());
-        expect(existProof.proof.existence).to.be.true;
-      });
+      const expectedSiblings: { [id: string]: bigint[] } = {
+        '6': [],
+        '4': [0n, 8281804442553804052634892902276241371362897230229887706643673501401618941157n],
+        '2': [
+          0n,
+          9054077202653694725190129562729426419405710792276939073869944863201489138082n,
+          8281804442553804052634892902276241371362897230229887706643673501401618941157n
+        ]
+      };
 
-      keys.map(async (v) => {
-        await mt.delete(v);
-        const existProof = await mt.generateProof(v, await mt.root());
+      for (const k of keys) {
+        await mt.add(k, k);
+        const existProof = await mt.generateProof(k, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+        compareSiblings(expectedSiblings[k.toString()], existProof.proof);
+      }
+
+      const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
+        '6': [0n, 9054077202653694725190129562729426419405710792276939073869944863201489138082n],
+        '4': [],
+        '2': []
+      };
+
+      for (const k of keys) {
+        await mt.delete(k);
+        const existProof = await mt.generateProof(k, await mt.root());
         expect(existProof.proof.existence).to.be.false;
-      });
+        compareSiblings(expectedSiblingsNonExist[k.toString()], existProof.proof);
+      }
     });
 
-    it('test delete leaf near middle node left fork deep', async () => {
+    it('test delete leaf near middle node. Left branch deep', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
       const keys = [4n, 8n, 16n];
 
-      keys.map(async (v) => {
-        await mt.add(v, v);
-        const existProof = await mt.generateProof(v, await mt.root());
-        expect(existProof.proof.existence).to.be.true;
-      });
+      const expectedSiblings: { [id: string]: bigint[] } = {
+        '4': [],
+        '8': [
+          0n,
+          0n,
+          9054077202653694725190129562729426419405710792276939073869944863201489138082n
+        ],
+        '16': [
+          0n,
+          0n,
+          9054077202653694725190129562729426419405710792276939073869944863201489138082n,
+          16390924951002018924619640791777477120654009069056735603697729984158734051481n
+        ]
+      };
 
-      keys.map(async (v) => {
-        await mt.delete(v);
-        const existProof = await mt.generateProof(v, await mt.root());
+      for (const k of keys) {
+        await mt.add(k, k);
+        const existProof = await mt.generateProof(k, await mt.root());
+        expect(existProof.proof.existence).to.be.true;
+        compareSiblings(expectedSiblings[k.toString()], existProof.proof);
+      }
+
+      const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
+        '4': [0n, 0n, 999617652929602377745081623447845927693004638040169919261337791961364573823n],
+        '8': [],
+        '16': []
+      };
+
+      for (const k of keys) {
+        await mt.delete(k);
+        const existProof = await mt.generateProof(k, await mt.root());
         expect(existProof.proof.existence).to.be.false;
-      });
+        compareSiblings(expectedSiblingsNonExist[k.toString()], existProof.proof);
+      }
     });
 
     // Checking whether the last leaf will be moved to the root position
@@ -599,8 +685,8 @@ for (let index = 0; index < storages.length; index++) {
     // Up to:
     //
     //	root(11)
-    it('test up to root after delete right fork', async () => {
-      const sto = getTreeStorage('reght fork');
+    it('test up to root after delete. Right branch', async () => {
+      const sto = getTreeStorage('right branch');
       const mt = new Merkletree(sto, true, 10);
 
       await mt.add(1n, 1n);
@@ -624,8 +710,8 @@ for (let index = 0; index < storages.length; index++) {
     // Up to:
     //
     //	root(100)
-    it('test up to root after delete left fork', async () => {
-      const sto = getTreeStorage('left fork');
+    it('test up to root after delete. Left branch', async () => {
+      const sto = getTreeStorage('left branch');
       const mt = new Merkletree(sto, true, 10);
 
       await mt.add(2n, 2n);
@@ -651,7 +737,7 @@ for (let index = 0; index < storages.length; index++) {
     //	 root
     //	 /  \
     //	10  11
-    it('calculating of new root right fork', async () => {
+    it('calculating of new root. Right branch', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
@@ -683,7 +769,7 @@ for (let index = 0; index < storages.length; index++) {
     //	  root
     //	 /   \
     //	100  001
-    it('calculating of new root left fork', async () => {
+    it('calculating of new root. Left branch', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 10);
 
@@ -700,6 +786,181 @@ for (let index = 0; index < storages.length; index++) {
 
       expect(lleaf.entry[0].bigInt()).to.be.eq(4n);
       expect(rleaf.entry[0].bigInt()).to.be.eq(1n);
+    });
+
+    // https://github.com/iden3/go-merkletree-sql/issues/23
+    it('test insert node after delete', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+
+      const expectedSiblings = [
+        0n,
+        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+      ];
+
+      await mt.delete(7n);
+      let proof = await mt.generateProof(7n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(expectedSiblings, proof.proof);
+
+      await mt.add(7n, 7n);
+      proof = await mt.generateProof(7n, await mt.root());
+      expect(proof.proof.existence).to.be.true;
+      compareSiblings(expectedSiblings, proof.proof);
+    });
+
+    it('test insert deleted node then update it. Right branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+
+      const expectedSiblings = [
+        0n,
+        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+      ];
+
+      await mt.delete(7n);
+      let proof = await mt.generateProof(7n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(expectedSiblings, proof.proof);
+
+      await mt.add(7n, 7n);
+      proof = await mt.generateProof(7n, await mt.root());
+      expect(proof.proof.existence).to.be.true;
+      compareSiblings(expectedSiblings, proof.proof);
+
+      await mt.update(7n, 100n);
+      const updatedNode = await mt.get(7n);
+      expect(updatedNode.key).to.be.eq(7n);
+      expect(updatedNode.value).to.be.eq(100n);
+    });
+
+    it('test insert deleted node then update it. Left branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(6n, 6n);
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+
+      const expectedSiblings = [
+        0n,
+        8485562453225409715331824380162827639878522662998299574537757078697535221073n
+      ];
+
+      await mt.delete(4n);
+      let proof = await mt.generateProof(4n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(expectedSiblings, proof.proof);
+
+      await mt.add(4n, 4n);
+      proof = await mt.generateProof(4n, await mt.root());
+      expect(proof.proof.existence).to.be.true;
+      compareSiblings(expectedSiblings, proof.proof);
+
+      await mt.update(4n, 100n);
+      const updatedNode = await mt.get(4n);
+      expect(updatedNode.key).to.be.eq(4n);
+      expect(updatedNode.value).to.be.eq(100n);
+    });
+
+    it('test push leaf already exists. Right branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(5n, 5n);
+      await mt.add(7n, 7n);
+      await mt.add(3n, 3n);
+
+      const expectedSiblingsNonExist = [
+        0n,
+        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+      ];
+      await mt.delete(3n);
+      let proof = await mt.generateProof(3n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(expectedSiblingsNonExist, proof.proof);
+
+      const expectedSiblingsExist = [
+        0n,
+        4274876798241152869364032215387952876266736406919374878317677138322903129320n,
+        3968539605503372859924195689353752825000692947459401078008697788408142999740n
+      ];
+      await mt.add(3n, 3n);
+      proof = await mt.generateProof(3n, await mt.root());
+      expect(proof.proof.existence).to.be.true;
+      compareSiblings(expectedSiblingsExist, proof.proof);
+    });
+
+    it('test push leaf already exists. Left branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(6n, 6n);
+      await mt.add(2n, 2n);
+      await mt.add(4n, 4n);
+      await mt.add(8n, 8n);
+
+      const expectedSiblingsNonExist = [
+        0n,
+        8485562453225409715331824380162827639878522662998299574537757078697535221073n
+      ];
+      await mt.delete(8n);
+      let proof = await mt.generateProof(8n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(expectedSiblingsNonExist, proof.proof);
+
+      const expectedSiblingsExist = [
+        0n,
+        8485562453225409715331824380162827639878522662998299574537757078697535221073n,
+        9054077202653694725190129562729426419405710792276939073869944863201489138082n
+      ];
+      await mt.add(8n, 8n);
+      proof = await mt.generateProof(8n, await mt.root());
+      expect(proof.proof.existence).to.be.true;
+      compareSiblings(expectedSiblingsExist, proof.proof);
+    });
+
+    it('test up nodes to two levels. Right branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(1n, 1n);
+      await mt.add(7n, 7n);
+      await mt.add(15n, 15n);
+      await mt.delete(15n);
+
+      const proof = await mt.generateProof(15n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(
+        [0n, 1243904711429961858774220647610724273798918457991486031567244100767259239747n],
+        proof.proof
+      );
+    });
+
+    it('test up nodes to two levels. Left branch', async () => {
+      const sto = getTreeStorage();
+      const mt = new Merkletree(sto, true, 10);
+
+      await mt.add(2n, 2n);
+      await mt.add(8n, 8n);
+      await mt.add(16n, 16n);
+      await mt.delete(16n);
+
+      const proof = await mt.generateProof(16n, await mt.root());
+      expect(proof.proof.existence).to.be.false;
+      compareSiblings(
+        [0n, 849831128489032619062850458217693666094013083866167024127442191257793527951n],
+        proof.proof
+      );
     });
 
     it('test dump leafs and import leafs', async () => {
@@ -924,3 +1185,11 @@ for (let index = 0; index < storages.length; index++) {
     });
   });
 }
+
+const compareSiblings = (expectedSiblings: bigint[], p: Proof) => {
+  const actualSiblings = p.allSiblings();
+  expect(actualSiblings.length).to.be.eq(expectedSiblings.length);
+  for (let i = 0; i < expectedSiblings.length; i++) {
+    expect(actualSiblings[i].bigInt()).to.be.eq(expectedSiblings[i]);
+  }
+};

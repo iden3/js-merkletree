@@ -402,7 +402,7 @@ export class Merkletree {
       await this.#db.setRoot(this.#root);
     }
 
-    const nearestSibling = await this.#db.get(kHash.bytes);
+    const nearestSibling = await this.#db.get(toUpload.bytes);
     if (nearestSibling?.type === NODE_TYPE_MIDDLE) {
       let newNode: Node;
       if (path[siblings.length - 1]) {
@@ -418,6 +418,7 @@ export class Merkletree {
       );
       this.#root = newRootKey;
       await this.#db.setRoot(this.#root);
+      return;
     }
 
     for (let i = siblings.length - 2; i >= 0; i -= 1) {
