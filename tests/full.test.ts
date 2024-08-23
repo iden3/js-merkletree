@@ -1183,6 +1183,29 @@ for (let index = 0; index < storages.length; index++) {
       expect(cvp.value.string()).to.be.equal('22');
       expect(cvp.fnc).to.be.equal(0);
     });
+    it('calcualte depth for mtp', async () => {
+      const storage = getTreeStorage('calculatedepth');
+      const mt = new Merkletree(storage, true, 40);
+
+      await mt.add(BigInt('1'), BigInt('2'));
+      await mt.add(BigInt('3'), BigInt('8'));
+      await mt.add(BigInt('7'), BigInt('8'));
+      await mt.add(BigInt('9'), BigInt('8'));
+
+      const { proof }: { proof: Proof } = await mt.generateProof(BigInt('11'), await mt.root());
+
+      const given = `{ "existence": false, "siblings": [ "0", "12166698708103333637493481507263348370172773813051235807348785759284762677336", "7750564177398573185975752951631372712868228752107043582052272719841058100111", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" ], "node_aux": { "key": "3", "value": "8" }}`;
+      const p = Proof.fromJSON(JSON.parse(given));
+
+      expect(proof.allSiblings()).to.deep.equal(p.allSiblings());
+      expect(proof.nodeAux).to.deep.equal(p.nodeAux);
+      expect(proof.existence).to.equal(p.existence);
+
+      let isValid = await verifyProof(await mt.root(), proof, BigInt('11'), BigInt('0'));
+      expect(isValid).to.be.true;
+      isValid = await verifyProof(await mt.root(), p, BigInt('11'), BigInt('0'));
+      expect(isValid).to.be.true;
+    });
   });
 }
 

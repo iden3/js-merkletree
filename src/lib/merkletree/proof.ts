@@ -10,7 +10,7 @@ import { Bytes } from '../../types';
 export interface ProofJSON {
   existence: boolean;
   siblings: string[];
-  nodeAux: NodeAuxJSON | undefined;
+  node_aux: NodeAuxJSON | undefined;
 }
 
 export interface NodeAuxJSON {
@@ -28,7 +28,7 @@ export class Proof {
 
   constructor(obj?: { siblings: Siblings; nodeAux: NodeAux | undefined; existence: boolean }) {
     this.existence = obj?.existence ?? false;
-    this.depth = obj?.siblings.length ?? 0;
+    this.depth = 0;
     this.nodeAux = obj?.nodeAux;
 
     const { siblings, notEmpties } = this.reduceSiblings(obj?.siblings);
@@ -66,7 +66,7 @@ export class Proof {
     return {
       existence: this.existence,
       siblings: this.allSiblings().map((s) => s.toJSON()),
-      nodeAux: this.nodeAux
+      node_aux: this.nodeAux
         ? {
             key: this.nodeAux.key.toJSON(),
             value: this.nodeAux.value.toJSON()
@@ -87,6 +87,7 @@ export class Proof {
       if (JSON.stringify(siblings[i]) !== JSON.stringify(ZERO_HASH)) {
         setBitBigEndian(notEmpties, i);
         reducedSiblings.push(sibling);
+        this.depth = i + 1;
       }
     }
     return { notEmpties, siblings: reducedSiblings };
@@ -94,10 +95,10 @@ export class Proof {
 
   public static fromJSON(obj: ProofJSON): Proof {
     let nodeAux: NodeAux | undefined = undefined;
-    if (obj.nodeAux) {
+    if (obj.node_aux) {
       nodeAux = {
-        key: Hash.fromString(obj.nodeAux.key),
-        value: Hash.fromString(obj.nodeAux.value)
+        key: Hash.fromString(obj.node_aux.key),
+        value: Hash.fromString(obj.node_aux.value)
       };
     }
     const existence = obj.existence ?? false;
