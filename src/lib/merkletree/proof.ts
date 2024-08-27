@@ -10,7 +10,11 @@ import { Bytes } from '../../types';
 export interface ProofJSON {
   existence: boolean;
   siblings: string[];
-  node_aux: NodeAuxJSON | undefined;
+  node_aux: NodeAuxJSON | undefined; // this is a right representation of auxiliary node field according to the specification, nodeAux will be deprecated.
+  /**
+   * @deprecated old version is deprecated, do not use it.
+   */
+  nodeAux: NodeAuxJSON | undefined; // old version of representation of auxiliary node.
 }
 
 export interface NodeAuxJSON {
@@ -95,10 +99,11 @@ export class Proof {
 
   public static fromJSON(obj: ProofJSON): Proof {
     let nodeAux: NodeAux | undefined = undefined;
-    if (obj.node_aux) {
+    let nodeAuxJson: NodeAuxJSON | undefined = obj.node_aux ?? obj.nodeAux ?? undefined; // we keep backward compatibility and support both representations
+    if (nodeAuxJson) {
       nodeAux = {
-        key: Hash.fromString(obj.node_aux.key),
-        value: Hash.fromString(obj.node_aux.value)
+        key: Hash.fromString(nodeAuxJson.key),
+        value: Hash.fromString(nodeAuxJson.value)
       };
     }
     const existence = obj.existence ?? false;

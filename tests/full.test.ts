@@ -4,7 +4,13 @@ import { NodeLeaf, NodeMiddle } from '../src/lib/node/node';
 import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
 import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
 import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
-import { Merkletree, Proof, siblignsFroomProof, verifyProof } from '../src/lib/merkletree';
+import {
+  Merkletree,
+  Proof,
+  ProofJSON,
+  siblignsFroomProof,
+  verifyProof
+} from '../src/lib/merkletree';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 
 import { expect } from 'chai';
@@ -1097,7 +1103,31 @@ for (let index = 0; index < storages.length; index++) {
       await tree.walk(await tree.root(), (node: Node) => f(node));
     });
 
-    it('proof stringify', async () => {
+    it('proof stringify (old format for node aux)', async () => {
+      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+
+      for (let i = 0; i < 5; i++) {
+        await tree.add(BigInt(i), BigInt(i));
+      }
+
+      const { proof, value } = await tree.generateProof(BigInt(9));
+
+      const proofModel = JSON.stringify(proof);
+      const p = JSON.parse(proofModel) as ProofJSON;
+
+      p.nodeAux = p.node_aux;
+      p.node_aux = undefined;
+
+      const proofFromJSON = Proof.fromJSON(JSON.parse(proofModel));
+
+      expect(JSON.stringify(proof.allSiblings())).to.equal(
+        JSON.stringify(proofFromJSON.allSiblings())
+      );
+      expect(proof.existence).to.eq(proofFromJSON.existence);
+      expect(proof.existence).to.eq(false);
+      expect(JSON.stringify(proof.nodeAux)).to.eq(JSON.stringify(proofFromJSON.nodeAux));
+    });
+    it('proof stringify (new format for node aux)', async () => {
       const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
 
       for (let i = 0; i < 5; i++) {
