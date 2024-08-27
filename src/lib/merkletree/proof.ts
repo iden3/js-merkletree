@@ -99,7 +99,7 @@ export class Proof {
 
   public static fromJSON(obj: ProofJSON): Proof {
     let nodeAux: NodeAux | undefined = undefined;
-    const nodeAuxJson: NodeAuxJSON | undefined = obj.node_aux ?? obj.nodeAux ?? undefined; // we keep backward compatibility and support both representations
+    const nodeAuxJson: NodeAuxJSON | undefined = obj.node_aux ?? obj.nodeAux; // we keep backward compatibility and support both representations
     if (nodeAuxJson) {
       nodeAux = {
         key: Hash.fromString(nodeAuxJson.key),
