@@ -10,11 +10,11 @@ import { Bytes } from '../../types';
 export interface ProofJSON {
   existence: boolean;
   siblings: string[];
-  node_aux: NodeAuxJSON | undefined; // this is a right representation of auxiliary node field according to the specification, nodeAux will be deprecated.
+  node_aux?: NodeAuxJSON; // this is a right representation of auxiliary node field according to the specification, nodeAux will be deprecated.
   /**
    * @deprecated old version is deprecated, do not use it.
    */
-  nodeAux: NodeAuxJSON | undefined; // old version of representation of auxiliary node.
+  nodeAux?: NodeAuxJSON; // old version of representation of auxiliary node.
 }
 
 export interface NodeAuxJSON {
