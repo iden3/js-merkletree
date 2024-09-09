@@ -42,7 +42,7 @@ export const bytes2Hex = (u: Bytes): string => {
 };
 
 // NOTE: `bytes` should be big endian
-// bytes recieved from Hash.value getter are safe to use since their endianness is swapped, for the same reason the private Hash.bytes { stored in little endian } should never be used
+// bytes received from Hash.value getter are safe to use since their endianness is swapped, for the same reason the private Hash.bytes { stored in little endian } should never be used
 export const newBigIntFromBytes = (bytes: Bytes): bigint => {
   if (bytes.length !== HASH_BYTES_LENGTH) {
     throw `Expected 32 bytes, found ${bytes.length} bytes`;

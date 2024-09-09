@@ -13,7 +13,7 @@ export const ErrInvalidNodeFound = 'found an invalid node in the DB';
 // ErrInvalidProofBytes is used when a serialized proof is invalid.
 export const ErrInvalidProofBytes = 'the serialized proof is invalid';
 // ErrInvalidDBValue is used when a value in the key value DB is
-// invalid (for example, it doen't contain a byte header and a []byte
+// invalid (for example, it doesn't contain a byte header and a []byte
 // body of at least len=1.
 export const ErrInvalidDBValue = 'the value in the DB is invalid';
 // ErrEntryIndexAlreadyExists is used when the entry index already

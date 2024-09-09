@@ -25,7 +25,7 @@ export interface NodeAuxJSON {
 export class Proof {
   existence: boolean;
   private depth: number;
-  // notempties is a bitmap of non-empty siblings found in siblings
+  // notEmpties is a bitmap of non-empty siblings found in siblings
   private notEmpties: Bytes;
   private siblings: Siblings;
   nodeAux: NodeAux | undefined;
