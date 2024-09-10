@@ -10,7 +10,7 @@ module.exports = {
         ...spellcheckerRule,
         cspell: {
           ...cspellConfig,
-          ignoreWords: ['sibligns', 'Elems', 'Froom', 'hextable']
+          ignoreWords: ['Elems']
         }
       }
     ]

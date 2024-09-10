@@ -141,6 +141,7 @@ export class Proof {
  * @deprecated The method should not be used and will be removed in the next major version,
  * please use proof.allSiblings instead
  */
+// eslint-disable-next-line @cspell/spellchecker
 export const siblignsFroomProof = (proof: Proof): Siblings => {
   return proof.allSiblings();
 };
