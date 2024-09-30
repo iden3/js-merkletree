@@ -58,6 +58,7 @@
     "deps:check": "npx madge --circular --extensions ts ./"
   },
   "devDependencies": {
+    "@cspell/eslint-plugin": "^8.14.2",
     "@iden3/eslint-config": "https://github.com/iden3/eslint-config",
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-node-resolve": "^15.2.1",

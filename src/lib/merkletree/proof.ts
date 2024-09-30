@@ -25,7 +25,7 @@ export interface NodeAuxJSON {
 export class Proof {
   existence: boolean;
   private depth: number;
-  // notempties is a bitmap of non-empty siblings found in siblings
+  // notEmpties is a bitmap of non-empty siblings found in siblings
   private notEmpties: Bytes;
   private siblings: Siblings;
   nodeAux: NodeAux | undefined;
@@ -141,6 +141,7 @@ export class Proof {
  * @deprecated The method should not be used and will be removed in the next major version,
  * please use proof.allSiblings instead
  */
+// eslint-disable-next-line @cspell/spellchecker
 export const siblignsFroomProof = (proof: Proof): Siblings => {
   return proof.allSiblings();
 };

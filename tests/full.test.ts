@@ -260,7 +260,7 @@ for (let index = 0; index < storages.length; index++) {
       }
     });
 
-    it('test sibligns from proof', async () => {
+    it('test siblings from proof', async () => {
       const sto = getTreeStorage();
       const mt = new Merkletree(sto, true, 140);
 
