@@ -4,26 +4,26 @@ import { bytes2Hex, newBigIntFromBytes, swapEndianness } from '../utils';
 
 export class ElemBytes {
   // Little Endian
-  #bytes: Bytes;
+  private _bytes: Bytes;
 
   constructor() {
-    this.#bytes = new Uint8Array(ELEM_BYTES_LEN);
+    this._bytes = new Uint8Array(ELEM_BYTES_LEN);
   }
 
   get value(): Bytes {
-    return this.#bytes;
+    return this._bytes;
   }
 
   set value(b: Bytes) {
-    this.#bytes = b;
+    this._bytes = b;
   }
 
   bigInt(): bigint {
-    return newBigIntFromBytes(swapEndianness(this.#bytes));
+    return newBigIntFromBytes(swapEndianness(this._bytes));
   }
 
   string(): string {
-    const hexStr = bytes2Hex(this.#bytes.slice(0, 4));
+    const hexStr = bytes2Hex(this._bytes.slice(0, 4));
     return `${hexStr}...`;
   }
 }

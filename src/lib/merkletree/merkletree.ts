@@ -20,47 +20,47 @@ import { Proof } from './proof';
 import { Entry, checkEntryInField } from '../entry';
 
 export class Merkletree {
-  #db: ITreeStorage;
-  #root!: Hash;
-  #writable: boolean;
-  #maxLevel: number;
+  private _db: ITreeStorage;
+  private _root!: Hash;
+  private _writable: boolean;
+  private _maxLevel: number;
 
   constructor(_db: ITreeStorage, _writable: boolean, _maxLevels: number) {
-    this.#db = _db;
-    this.#writable = _writable;
-    this.#maxLevel = _maxLevels;
+    this._db = _db;
+    this._writable = _writable;
+    this._maxLevel = _maxLevels;
   }
 
   async root(): Promise<Hash> {
-    if (!this.#root) {
-      this.#root = await this.#db.getRoot();
+    if (!this._root) {
+      this._root = await this._db.getRoot();
     }
-    return this.#root;
+    return this._root;
   }
 
   get maxLevels(): number {
-    return this.#maxLevel;
+    return this._maxLevel;
   }
 
   async add(k: bigint, v: bigint): Promise<void> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
 
-    this.#root = await this.root();
+    this._root = await this.root();
     const kHash = Hash.fromBigInt(k);
     const vHash = Hash.fromBigInt(v);
 
     const newNodeLeaf = new NodeLeaf(kHash, vHash);
     const path = getPath(this.maxLevels, kHash.value);
 
-    const newRootKey = await this.addLeaf(newNodeLeaf, this.#root, 0, path);
-    this.#root = newRootKey;
-    await this.#db.setRoot(this.#root);
+    const newRootKey = await this.addLeaf(newNodeLeaf, this._root, 0, path);
+    this._root = newRootKey;
+    await this._db.setRoot(this._root);
   }
 
   async updateNode(n: Node): Promise<Hash> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
 
@@ -70,12 +70,12 @@ export class Merkletree {
 
     const k = await n.getKey();
 
-    await this.#db.put(k.value, n);
+    await this._db.put(k.value, n);
     return k;
   }
 
   async addNode(n: Node): Promise<Hash> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
     if (n.type === NODE_TYPE_EMPTY) {
@@ -87,28 +87,28 @@ export class Merkletree {
     //   throw ErrNodeKeyAlreadyExists;
     // }
 
-    await this.#db.put(k.value, n);
+    await this._db.put(k.value, n);
     return k;
   }
 
   async addEntry(e: Entry): Promise<void> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
 
     if (!checkEntryInField(e)) {
       throw 'elements not inside the finite field over r';
     }
-    this.#root = await this.#db.getRoot();
+    this._root = await this._db.getRoot();
     const hIndex = await e.hIndex();
     const hValue = await e.hValue();
 
     const newNodeLeaf = new NodeLeaf(hIndex, hValue);
     const path = getPath(this.maxLevels, hIndex.value);
 
-    const newRootKey = await this.addLeaf(newNodeLeaf, this.#root, 0, path);
-    this.#root = newRootKey;
-    await this.#db.setRoot(this.#root);
+    const newRootKey = await this.addLeaf(newNodeLeaf, this._root, 0, path);
+    this._root = newRootKey;
+    await this._db.setRoot(this._root);
   }
 
   async pushLeaf(
@@ -118,7 +118,7 @@ export class Merkletree {
     pathNewLeaf: Array<boolean>,
     pathOldLeaf: Array<boolean>
   ): Promise<Hash> {
-    if (lvl > this.#maxLevel - 2) {
+    if (lvl > this._maxLevel - 2) {
       throw new Error(ErrReachedMaxLevel);
     }
 
@@ -149,7 +149,7 @@ export class Merkletree {
   }
 
   async addLeaf(newLeaf: NodeLeaf, key: Hash, lvl: number, path: Array<boolean>): Promise<Hash> {
-    if (lvl > this.#maxLevel - 1) {
+    if (lvl > this._maxLevel - 1) {
       throw new Error(ErrReachedMaxLevel);
     }
 
@@ -243,7 +243,7 @@ export class Merkletree {
   }
 
   async update(k: bigint, v: bigint): Promise<CircomProcessorProof> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
 
@@ -288,8 +288,8 @@ export class Merkletree {
 
             const newRootKey = await this.recalculatePathUntilRoot(path, newNodeLeaf, siblings);
 
-            this.#root = newRootKey;
-            await this.#db.setRoot(newRootKey);
+            this._root = newRootKey;
+            await this._db.setRoot(newRootKey);
             cp.newRoot = newRootKey;
             return cp;
           }
@@ -315,7 +315,7 @@ export class Merkletree {
     if (bytesEqual(k.value, ZERO_HASH.value)) {
       return new NodeEmpty();
     }
-    return await this.#db.get(k.value);
+    return await this._db.get(k.value);
   }
 
   async recalculatePathUntilRoot(
@@ -348,17 +348,17 @@ export class Merkletree {
   // mt.ImportDumpedLeafs), but this will loose all the Root history of the
   // MerkleTree
   async delete(k: bigint): Promise<void> {
-    if (!this.#writable) {
+    if (!this._writable) {
       throw ErrNotWritable;
     }
 
     const kHash = Hash.fromBigInt(k);
     const path = getPath(this.maxLevels, kHash.value);
 
-    let nextKey = this.#root;
+    let nextKey = this._root;
     const siblings: Siblings = [];
 
-    for (let i = 0; i < this.#maxLevel; i += 1) {
+    for (let i = 0; i < this._maxLevel; i += 1) {
       const n = await this.getNode(nextKey);
       if (typeof n === 'undefined') {
         throw ErrNotFound;
@@ -391,18 +391,18 @@ export class Merkletree {
 
   async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings): Promise<void> {
     if (siblings.length === 0) {
-      this.#root = ZERO_HASH;
-      await this.#db.setRoot(this.#root);
+      this._root = ZERO_HASH;
+      await this._db.setRoot(this._root);
       return;
     }
 
     const toUpload = siblings[siblings.length - 1];
     if (siblings.length < 2) {
-      this.#root = siblings[0];
-      await this.#db.setRoot(this.#root);
+      this._root = siblings[0];
+      await this._db.setRoot(this._root);
     }
 
-    const nearestSibling = await this.#db.get(toUpload.bytes);
+    const nearestSibling = await this._db.get(toUpload.bytes);
     if (nearestSibling?.type === NODE_TYPE_MIDDLE) {
       let newNode: Node;
       if (path[siblings.length - 1]) {
@@ -416,8 +416,8 @@ export class Merkletree {
         newNode,
         siblings.slice(0, siblings.length - 1)
       );
-      this.#root = newRootKey;
-      await this.#db.setRoot(this.#root);
+      this._root = newRootKey;
+      await this._db.setRoot(this._root);
       return;
     }
 
@@ -433,14 +433,14 @@ export class Merkletree {
 
         const newRootKey = await this.recalculatePathUntilRoot(path, newNode, siblings.slice(0, i));
 
-        this.#root = newRootKey;
-        await this.#db.setRoot(this.#root);
+        this._root = newRootKey;
+        await this._db.setRoot(this._root);
         break;
       }
 
       if (i === 0) {
-        this.#root = toUpload;
-        await this.#db.setRoot(this.#root);
+        this._root = toUpload;
+        await this._db.setRoot(this._root);
         break;
       }
     }
