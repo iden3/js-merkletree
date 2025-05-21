@@ -8,16 +8,16 @@ import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import { bytes2Hex } from '../utils';
 
 export class LocalStorageDB implements ITreeStorage {
-  #currentRoot: Hash;
+  private _currentRoot: Hash;
 
   constructor(private readonly _prefix: Bytes) {
     const rootStr = localStorage.getItem(bytes2Hex(_prefix));
     if (rootStr) {
       const bytes: number[] = JSON.parse(rootStr);
 
-      this.#currentRoot = new Hash(Uint8Array.from(bytes));
+      this._currentRoot = new Hash(Uint8Array.from(bytes));
     } else {
-      this.#currentRoot = ZERO_HASH;
+      this._currentRoot = ZERO_HASH;
     }
   }
 
@@ -66,11 +66,11 @@ export class LocalStorageDB implements ITreeStorage {
   }
 
   async getRoot(): Promise<Hash> {
-    return this.#currentRoot;
+    return this._currentRoot;
   }
 
   async setRoot(r: Hash): Promise<void> {
-    this.#currentRoot = r;
+    this._currentRoot = r;
     localStorage.setItem(bytes2Hex(this._prefix), JSON.stringify(Array.from(r.bytes)));
   }
 }

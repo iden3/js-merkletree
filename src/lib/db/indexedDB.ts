@@ -12,10 +12,10 @@ export class IndexedDBStorage implements ITreeStorage {
   private readonly _prefixHash: string;
   private readonly _store: UseStore;
 
-  #currentRoot: Hash;
+  private _currentRoot: Hash;
 
   constructor(private readonly _prefix: Bytes, databaseName?: string) {
-    this.#currentRoot = ZERO_HASH;
+    this._currentRoot = ZERO_HASH;
     this._prefixHash = bytes2Hex(_prefix);
     this._store = createStore(
       `${databaseName ?? IndexedDBStorage.storageName}-db`,
@@ -54,21 +54,21 @@ export class IndexedDBStorage implements ITreeStorage {
   }
 
   async getRoot(): Promise<Hash> {
-    if (!this.#currentRoot.equals(ZERO_HASH)) {
-      return this.#currentRoot;
+    if (!this._currentRoot.equals(ZERO_HASH)) {
+      return this._currentRoot;
     }
     const root = await get(this._prefixHash, this._store);
 
     if (!root) {
-      this.#currentRoot = ZERO_HASH;
+      this._currentRoot = ZERO_HASH;
     } else {
-      this.#currentRoot = new Hash(root.bytes);
+      this._currentRoot = new Hash(root.bytes);
     }
-    return this.#currentRoot;
+    return this._currentRoot;
   }
 
   async setRoot(r: Hash): Promise<void> {
     await set(this._prefixHash, r, this._store);
-    this.#currentRoot = r;
+    this._currentRoot = r;
   }
 }

@@ -14,19 +14,19 @@ export class NodeLeaf implements Node {
   type: NodeType;
   entry: [Hash, Hash];
   // cache used to avoid recalculating key
-  #key: Hash;
+  private _key: Hash;
 
   constructor(k: Hash, v: Hash) {
     this.type = NODE_TYPE_LEAF;
     this.entry = [k, v];
-    this.#key = ZERO_HASH;
+    this._key = ZERO_HASH;
   }
 
   async getKey(): Promise<Hash> {
-    if (this.#key === ZERO_HASH) {
+    if (this._key === ZERO_HASH) {
       return await leafKey(this.entry[0], this.entry[1]);
     }
-    return this.#key;
+    return this._key;
   }
 
   get value(): Bytes {
@@ -42,20 +42,20 @@ export class NodeMiddle implements Node {
   type: NodeType;
   childL: Hash;
   childR: Hash;
-  #key: Hash;
+  private _key: Hash;
 
   constructor(cL: Hash, cR: Hash) {
     this.type = NODE_TYPE_MIDDLE;
     this.childL = cL;
     this.childR = cR;
-    this.#key = ZERO_HASH;
+    this._key = ZERO_HASH;
   }
 
   async getKey(): Promise<Hash> {
-    if (this.#key === ZERO_HASH) {
+    if (this._key === ZERO_HASH) {
       return hashElems([this.childL.bigInt(), this.childR.bigInt()]);
     }
-    return this.#key;
+    return this._key;
   }
 
   get value(): Bytes {
@@ -69,11 +69,11 @@ export class NodeMiddle implements Node {
 
 export class NodeEmpty implements Node {
   type: NodeType;
-  #key: Hash;
+  private _key: Hash;
 
   constructor() {
     this.type = NODE_TYPE_EMPTY;
-    this.#key = ZERO_HASH;
+    this._key = ZERO_HASH;
   }
 
   async getKey(): Promise<Hash> {
