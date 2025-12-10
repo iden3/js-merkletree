@@ -1,4 +1,4 @@
-import { Hash } from '../lib/hash/hash';
+import { Hash, HashAlgorithm } from '../lib/hash/hash';
 import { Bytes } from './bytes';
 
 export type NodeType = 0 | 1 | 2;

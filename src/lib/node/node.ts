@@ -1,5 +1,5 @@
 import { Bytes, Node, NodeType } from '../../types';
-import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
+import { Hash, ZERO_HASH, hashElems, HashAlgorithm } from '../hash/hash';
 
 import {
   EMPTY_NODE_STRING,
@@ -15,16 +15,18 @@ export class NodeLeaf implements Node {
   entry: [Hash, Hash];
   // cache used to avoid recalculating key
   private _key: Hash;
+  private _algo: HashAlgorithm = HashAlgorithm.Poseidon;
 
-  constructor(k: Hash, v: Hash) {
+  constructor(k: Hash, v: Hash, algo: HashAlgorithm) {
     this.type = NODE_TYPE_LEAF;
     this.entry = [k, v];
     this._key = ZERO_HASH;
+    this._algo = algo;
   }
 
   async getKey(): Promise<Hash> {
     if (this._key === ZERO_HASH) {
-      return await leafKey(this.entry[0], this.entry[1]);
+      return await leafKey(this.entry[0], this.entry[1], this._algo);
     }
     return this._key;
   }
@@ -43,17 +45,19 @@ export class NodeMiddle implements Node {
   childL: Hash;
   childR: Hash;
   private _key: Hash;
+  private _algo: HashAlgorithm;
 
-  constructor(cL: Hash, cR: Hash) {
+  constructor(cL: Hash, cR: Hash, algo: HashAlgorithm) {
     this.type = NODE_TYPE_MIDDLE;
     this.childL = cL;
     this.childR = cR;
     this._key = ZERO_HASH;
+    this._algo = algo;
   }
 
   async getKey(): Promise<Hash> {
     if (this._key === ZERO_HASH) {
-      return hashElems([this.childL.bigInt(), this.childR.bigInt()]);
+      return hashElems([this.childL.bigInt(), this.childR.bigInt()], this._algo);
     }
     return this._key;
   }

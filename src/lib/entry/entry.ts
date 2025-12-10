@@ -1,18 +1,20 @@
 import { Data } from '../entry/data';
-import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
+import { Hash, ZERO_HASH, hashElems, HashAlgorithm } from '../hash/hash';
 import { checkBigIntInField } from '../utils';
 
 import { ElemBytes } from './elemBytes';
 
 export class Entry {
+  private _algo: HashAlgorithm;
   private _data: Data;
   private _hIndex: Hash;
   private _hValue: Hash;
 
-  constructor(_data?: Data) {
+  constructor(_data?: Data, algo?: HashAlgorithm) {
     this._data = _data ? _data : new Data();
     this._hIndex = ZERO_HASH;
     this._hValue = ZERO_HASH;
+    this._algo = algo ?? HashAlgorithm.Poseidon;
   }
 
   get data(): Data {
@@ -27,16 +29,20 @@ export class Entry {
     return this._data.value.slice(4, 8);
   }
 
+  get algo(): HashAlgorithm {
+    return this._algo;
+  }
+
   async hIndex(): Promise<Hash> {
     if (this._hIndex === ZERO_HASH) {
-      return hashElems(elemBytesToBigInts(this.index));
+      return hashElems(elemBytesToBigInts(this.index), this._algo);
     }
     return this._hIndex;
   }
 
   async hValue(): Promise<Hash> {
     if (this._hValue === ZERO_HASH) {
-      return hashElems(elemBytesToBigInts(this.value));
+      return hashElems(elemBytesToBigInts(this.value), this._algo);
     }
     return this._hValue;
   }
@@ -58,7 +64,7 @@ export class Entry {
   }
 
   clone(): Entry {
-    return new Entry(this._data);
+    return new Entry(this._data, this._algo);
   }
 }
 
@@ -75,7 +81,7 @@ export const checkEntryInField = (e: Entry): boolean => {
   let flag = true;
 
   bigInts.forEach((b) => {
-    if (!checkBigIntInField(b)) {
+    if (!e.algo.checkEntryInField(b)) {
       flag = false;
     }
   });

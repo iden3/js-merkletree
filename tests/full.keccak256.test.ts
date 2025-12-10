@@ -38,11 +38,11 @@ for (let index = 0; index < storages.length; index++) {
 
     const getTreeStorage = (prefix = '') => {
       if (storages[index] == TreeStorageType.LocalStorageDB) {
-        return new LocalStorageDB(str2Bytes(prefix));
+        return new LocalStorageDB(str2Bytes(prefix), HashAlgorithm.Keccak256);
       } else if (storages[index] == TreeStorageType.IndexedDB) {
-        return new IndexedDBStorage(str2Bytes(prefix));
+        return new IndexedDBStorage(str2Bytes(prefix), HashAlgorithm.Keccak256);
       } else if (storages[index] == TreeStorageType.InMemoryDB) {
-        return new InMemoryDB(str2Bytes(prefix));
+        return new InMemoryDB(str2Bytes(prefix), HashAlgorithm.Keccak256);
       }
       throw new Error('error: unknown storage type');
     };
@@ -54,7 +54,7 @@ for (let index = 0; index < storages.length; index++) {
       bytes[0] = 1;
       const v = new Hash(bytes);
 
-      const node = new NodeMiddle(v, v, HashAlgorithm.Poseidon);
+      const node = new NodeMiddle(v, v, HashAlgorithm.Keccak256);
       const k = await node.getKey();
       await sto.put(k.value, node);
       const val = await sto.get(k.value);
@@ -71,17 +71,17 @@ for (let index = 0; index < storages.length; index++) {
 
       await mt.add(BigInt('1'), BigInt('2'));
       expect((await mt.root()).bigInt().toString(10)).toEqual(
-        '13578938674299138072471463694055224830892726234048532520316387704878000008795'
+        '20349940423862035287868699599764962454537984981628200184279725786303353984557'
       );
 
       await mt.add(BigInt('33'), BigInt('44'));
       expect((await mt.root()).bigInt().toString(10)).toEqual(
-        '5412393676474193513566895793055462193090331607895808993925969873307089394741'
+        '76534138237239231515859035502772486263463178175980489503663557460094727691106'
       );
 
       await mt.add(BigInt('1234'), BigInt('9876'));
       expect((await mt.root()).bigInt().toString(10)).toEqual(
-        '14204494359367183802864593755198662203838502594566452929175967972147978322084'
+        '544861533666138023304524147783425313319718916836013588107382050253858247287'
       );
 
       expect((await sto.getRoot()).bigInt().toString()).toEqual(
@@ -91,9 +91,9 @@ for (let index = 0; index < storages.length; index++) {
       const { proof, value } = await mt.generateProof(BigInt('33'));
       expect(value.toString()).toEqual('44');
 
-      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('44'))).toEqual(true);
+      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('44'), HashAlgorithm.Keccak256)).toEqual(true);
 
-      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('45'))).toEqual(false);
+      expect(await verifyProof(await mt.root(), proof, BigInt('33'), BigInt('45'), HashAlgorithm.Keccak256)).toEqual(false);
     });
 
     it('test tree with one node', async () => {
@@ -103,11 +103,10 @@ for (let index = 0; index < storages.length; index++) {
 
       await mt.add(BigInt('100'), BigInt('200'));
       expect((await mt.root()).bigInt().toString(10)).toEqual(
-        '798876344175601936808542466911896801961231313012372360729165540443724338832'
+        '76684871214838026877932731174111849409910921034598023076966884922227909952638'
       );
       const inputs = [BigInt('100'), BigInt('200'), BigInt('1')];
-      const res = poseidon.hash(inputs);
-      expect((await mt.root()).bigInt().toString()).toEqual(res.toString());
+      expect((await mt.root()).bigInt().toString()).toEqual("76684871214838026877932731174111849409910921034598023076966884922227909952638");
     });
 
     it('test add and different order', async () => {
@@ -130,7 +129,7 @@ for (let index = 0; index < storages.length; index++) {
 
       expect((await mt1.root()).string()).toEqual((await mt2.root()).string());
       expect((await mt1.root()).hex()).toEqual(
-        '3b89100bec24da9275c87bc188740389e1d5accfc7d88ba5688d7fa96a00d82f'
+        '71d5901d6ab3653ef7a8f24e4a16f4932752d9192a2c4bea8a1a7cadd93c11a9'
       );
     });
 
@@ -233,7 +232,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const { proof, value } = await mt.generateProof(BigInt('42'));
       expect(value.toString()).toEqual('0');
-      const verRes = await verifyProof(await mt.root(), proof, BigInt('42'), BigInt('0'));
+      const verRes = await verifyProof(await mt.root(), proof, BigInt('42'), BigInt('0'), HashAlgorithm.Keccak256);
       expect(verRes).toEqual(true);
     });
 
@@ -268,22 +267,22 @@ for (let index = 0; index < storages.length; index++) {
       expect(siblings.length).toEqual(6);
 
       expect(siblings[0].hex()).toEqual(
-        'd6e368bda90c5ee3e910222c1fc1c0d9e23f2d350dbc47f4a92de30f1be3c60b'
+        'b2cee61650a6275e75b6bef5d338a14ac490db97614b1392ebfd1abccbb5725a'
       );
       expect(siblings[1].hex()).toEqual(
-        '9dbd03b1bcd580e0f3e6668d80d55288f04464126feb1624ec8ee30be8df9c16'
+        'c683ae7a8d9800bd5114ccc05ac673be7a20a5152c782305076166a8a27089ee'
       );
       expect(siblings[2].hex()).toEqual(
-        'de866af9545dcd1c5bb7811e7f27814918e037eb9fead40919e8f19525896e27'
+        '2e7090f730df0afda34acd203dfb44fa5c83a01480c4ab32f7af362e9fc66c2e'
       );
       expect(siblings[3].hex()).toEqual(
-        '5f4182212a84741d1174ba7c42e369f2e3ad8ade7d04eea2d0f98e3ed8b7a317'
+        '4f397ca4e191df962d78d7339cc83c8f2a5418e5801158bb576d02cca5ed893b'
       );
       expect(siblings[4].hex()).toEqual(
-        '77639098d513f7aef9730fdb1d1200401af5fe9da91b61772f4dd142ac89a122'
+        'd0b7a51724a7be4781dd97fb8e901e45b2e14f2587f3b933f8830d2e318ed5dd'
       );
       expect(siblings[5].hex()).toEqual(
-        '943ee501f4ba2137c79b54af745dfc5f105f539fcc449cd2a356eb5c030e3c07'
+        '0e029c03a12eadd7c268a105fbcb837c71ea26a762a429151db46192ae68483f'
       );
     });
 
@@ -297,9 +296,9 @@ for (let index = 0; index < storages.length; index++) {
 
       let { proof } = await mt.generateProof(BigInt('4'));
       expect(proof.existence).toEqual(true);
-      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'))).toEqual(true);
+      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'), HashAlgorithm.Keccak256)).toEqual(true);
       expect(bytes2Hex(proof.bytes())).toEqual(
-        '0003000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df06'
+        '00030000000000000000000000000000000000000000000000000000000000077baea77c663ade84f8375ee0caed270e1188c0b0715c48c4801d79ebc6a3bbbca47a068a9c0c91be00d31d79688c762a167036b67beae6ea06d6d522e752605ad9892c0d81c801830cd9216e6ff31da83fb8745b1365aa34fc600092aa4bfecb'
       );
 
       for (let i = 8; i < 32; i += 1) {
@@ -311,18 +310,18 @@ for (let index = 0; index < storages.length; index++) {
       proof = (await mt.generateProof(BigInt('12'))).proof;
       expect(proof.existence).toEqual(false);
       expect(proof.nodeAux).toBeDefined();
-      expect(await verifyProof(await mt.root(), proof, BigInt('12'), BigInt('0'))).toEqual(true);
+      expect(await verifyProof(await mt.root(), proof, BigInt('12'), BigInt('0'), HashAlgorithm.Keccak256)).toEqual(true);
       expect(bytes2Hex(proof.bytes())).toEqual(
-        '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e40344ad686a18ba78b502c0b6f285c5c8393bde2f7a3e2abe586515e4d84533e3037b062539bde2d80749746986cf8f0001fd2cdbf9a89fcbf981a769daef49df0604000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
+        '03030000000000000000000000000000000000000000000000000000000000077baea77c663ade84f8375ee0caed270e1188c0b0715c48c4801d79ebc6a3bbbca47a068a9c0c91be00d31d79688c762a167036b67beae6ea06d6d522e752605ad9892c0d81c801830cd9216e6ff31da83fb8745b1365aa34fc600092aa4bfecb04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
       );
 
       // non-existence proof, node aux
       proof = (await mt.generateProof(BigInt('10'))).proof;
       expect(proof.existence).toEqual(false);
       expect(proof.nodeAux).toBeDefined();
-      expect(await verifyProof(await mt.root(), proof, BigInt('10'), BigInt('0'))).toEqual(true);
+      expect(await verifyProof(await mt.root(), proof, BigInt('10'), BigInt('0'), HashAlgorithm.Keccak256)).toEqual(true);
       expect(bytes2Hex(proof.bytes())).toEqual(
-        '0303000000000000000000000000000000000000000000000000000000000007529cbedbda2bdd25fd6455551e55245fa6dc11a9d0c27dc0cd38fca44c17e4030acfcdd2617df9eb5aef744c5f2e03eb8c92c61f679007dc1f2707fd908ea41a9433745b469c101edca814c498e7f388100d497b24f1d2ac935bced3572f591d02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
+        '03030000000000000000000000000000000000000000000000000000000000077baea77c663ade84f8375ee0caed270e1188c0b0715c48c4801d79ebc6a3bbbc73522996e2f99e663eb22db2b85ee06ec6eb91fef6e79fa27e04c7f64f96cae442247dfe8781b5b6cf155d9f12bc7235d8589002a7102dbd4068e60e4f9b74d702000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000' //nolint:lll
       );
     });
 
@@ -337,7 +336,7 @@ for (let index = 0; index < storages.length; index++) {
       // correspond to node in the proof)
       let { proof } = await mt.generateProof(BigInt('4'));
       expect(proof.existence).toEqual(true);
-      expect(await verifyProof(await mt.root(), proof, BigInt('5'), BigInt('5'))).toEqual(false);
+      expect(await verifyProof(await mt.root(), proof, BigInt('5'), BigInt('5'), HashAlgorithm.Keccak256)).toEqual(false);
 
       // Invalid non-existence proof (Non-existence proof, diff. node aux)
       proof = (await mt.generateProof(BigInt('4'))).proof;
@@ -348,7 +347,7 @@ for (let index = 0; index < storages.length; index++) {
         value: Hash.fromBigInt(BigInt('4'))
       };
 
-      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'))).toEqual(false);
+      expect(await verifyProof(await mt.root(), proof, BigInt('4'), BigInt('0'), HashAlgorithm.Keccak256)).toEqual(false);
     });
 
     it('test delete', async () => {
@@ -357,22 +356,22 @@ for (let index = 0; index < storages.length; index++) {
 
       await mt.add(BigInt('1'), BigInt('2'));
       expect((await mt.root()).string()).toEqual(
-        '13578938674299138072471463694055224830892726234048532520316387704878000008795'
+        '20349940423862035287868699599764962454537984981628200184279725786303353984557'
       );
 
       await mt.add(BigInt('33'), BigInt('44'));
       expect((await mt.root()).string()).toEqual(
-        '5412393676474193513566895793055462193090331607895808993925969873307089394741'
+        '76534138237239231515859035502772486263463178175980489503663557460094727691106'
       );
 
       await mt.add(BigInt('1234'), BigInt('9876'));
       expect((await mt.root()).string()).toEqual(
-        '14204494359367183802864593755198662203838502594566452929175967972147978322084'
+        '544861533666138023304524147783425313319718916836013588107382050253858247287'
       );
 
       await mt.delete(BigInt('33'));
       expect((await mt.root()).string()).toEqual(
-        '15550352095346187559699212771793131433118240951738528922418613687814377955591'
+        '59172665240949163570629625279231866406762637838923705579001199098945372573940'
       );
 
       await mt.delete(BigInt('1234'));
@@ -423,13 +422,13 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('2'), BigInt('2'));
 
       expect((await mt1.root()).string()).toEqual(
-        '19060075022714027595905950662613111880864833370144986660188929919683258088314'
+        '108872779231739741211466661630182120869964350174968231253312446506137900102765'
       );
 
       await mt1.delete(BigInt('1'));
 
       expect((await mt1.root()).string()).toEqual(
-        '849831128489032619062850458217693666094013083866167024127442191257793527951'
+        '204679323412988774155807184358931572859960307382228217179160870267303983297'
       );
 
       await mt2.add(BigInt('2'), BigInt('2'));
@@ -447,13 +446,13 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('3'), BigInt('3'));
 
       expect((await mt1.root()).string()).toEqual(
-        '14109632483797541575275728657193822866549917334388996328141438956557066918117'
+        '112589100365384563636828753186771502102479135063472969221605103709843483709964'
       );
 
       await mt1.delete(BigInt('1'));
 
       expect((await mt1.root()).string()).toEqual(
-        '159935162486187606489815340465698714590556679404589449576549073038844694972'
+        '14186295076042981090325393415823129915089483719993442784504350225538352965231'
       );
 
       await mt2.add(BigInt('2'), BigInt('2'));
@@ -471,13 +470,13 @@ for (let index = 0; index < storages.length; index++) {
       await mt1.add(BigInt('33'), BigInt('44'));
 
       expect((await mt1.root()).string()).toEqual(
-        '5412393676474193513566895793055462193090331607895808993925969873307089394741'
+        '76534138237239231515859035502772486263463178175980489503663557460094727691106'
       );
 
       await mt1.delete(BigInt('1'));
 
       expect((await mt1.root()).string()).toEqual(
-        '18869260084287237667925661423624848342947598951870765316380602291081195309822'
+        '10955310555638083816119775899206389561202556659568675876759181443512300421331'
       );
 
       await mt2.add(BigInt('33'), BigInt('44'));
@@ -517,11 +516,11 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblings: { [id: string]: bigint[] } = {
         '7': [],
-        '1': [0n, 3968539605503372859924195689353752825000692947459401078008697788408142999740n],
+        '1': [0n, 58778245672362516760657188918491108074068739632281986516447865413987646804066n],
         '5': [
           0n,
-          3968539605503372859924195689353752825000692947459401078008697788408142999740n,
-          1243904711429961858774220647610724273798918457991486031567244100767259239747n
+          58778245672362516760657188918491108074068739632281986516447865413987646804066n,
+          37245951031790617425846662166414203447230852981947190519491676860679629218468n
         ]
       };
 
@@ -533,7 +532,7 @@ for (let index = 0; index < storages.length; index++) {
       }
 
       const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
-        '7': [0n, 4274876798241152869364032215387952876266736406919374878317677138322903129320n],
+        '7': [0n, 90793012380542163121115292742720211788796606421058579751728012408711775415639n],
         '1': [],
         '5': []
       };
@@ -557,13 +556,13 @@ for (let index = 0; index < storages.length; index++) {
         '7': [
           0n,
           0n,
-          14218827602097913497782608311388761513660285528499590827800641410537362569671n
+          45906869880764156987885874863987484108432793389080846151397980307504325728862n
         ],
         '15': [
           0n,
           0n,
-          14218827602097913497782608311388761513660285528499590827800641410537362569671n,
-          3968539605503372859924195689353752825000692947459401078008697788408142999740n
+          45906869880764156987885874863987484108432793389080846151397980307504325728862n,
+          58778245672362516760657188918491108074068739632281986516447865413987646804066n
         ]
       };
 
@@ -578,7 +577,7 @@ for (let index = 0; index < storages.length; index++) {
         '3': [
           0n,
           0n,
-          10179745751648650481317481301133564568831136415508833815669215270622331305772n
+          66983951388551681909755987368531576513037053734179480194567340249595337759173n
         ],
         '7': [],
         '15': []
@@ -600,11 +599,11 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblings: { [id: string]: bigint[] } = {
         '6': [],
-        '4': [0n, 8281804442553804052634892902276241371362897230229887706643673501401618941157n],
+        '4': [0n, 47167624024095951102360683516988377651272751399124548217514357033029495756702n],
         '2': [
           0n,
-          9054077202653694725190129562729426419405710792276939073869944863201489138082n,
-          8281804442553804052634892902276241371362897230229887706643673501401618941157n
+          75643218886135556618007590826502336434547303617941809863348288103535263487329n,
+          47167624024095951102360683516988377651272751399124548217514357033029495756702n
         ]
       };
 
@@ -616,7 +615,7 @@ for (let index = 0; index < storages.length; index++) {
       }
 
       const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
-        '6': [0n, 9054077202653694725190129562729426419405710792276939073869944863201489138082n],
+        '6': [0n, 75643218886135556618007590826502336434547303617941809863348288103535263487329n],
         '4': [],
         '2': []
       };
@@ -640,13 +639,13 @@ for (let index = 0; index < storages.length; index++) {
         '8': [
           0n,
           0n,
-          9054077202653694725190129562729426419405710792276939073869944863201489138082n
+          75643218886135556618007590826502336434547303617941809863348288103535263487329n
         ],
         '16': [
           0n,
           0n,
-          9054077202653694725190129562729426419405710792276939073869944863201489138082n,
-          16390924951002018924619640791777477120654009069056735603697729984158734051481n
+          75643218886135556618007590826502336434547303617941809863348288103535263487329n,
+          52845948298258825660916624299504428202505418019704865991722346431233437049494n
         ]
       };
 
@@ -658,7 +657,7 @@ for (let index = 0; index < storages.length; index++) {
       }
 
       const expectedSiblingsNonExist: { [id: string]: bigint[] } = {
-        '4': [0n, 0n, 999617652929602377745081623447845927693004638040169919261337791961364573823n],
+        '4': [0n, 0n, 107404637154263281958799614031313875322282089948200739151367618334012768311826n],
         '8': [],
         '16': []
       };
@@ -796,7 +795,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblings = [
         0n,
-        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+        90793012380542163121115292742720211788796606421058579751728012408711775415639n
       ];
 
       await mt.delete(7n);
@@ -820,7 +819,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblings = [
         0n,
-        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+        90793012380542163121115292742720211788796606421058579751728012408711775415639n
       ];
 
       await mt.delete(7n);
@@ -849,7 +848,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblings = [
         0n,
-        8485562453225409715331824380162827639878522662998299574537757078697535221073n
+        77032867444825930314963427098772579657571055799776141430952584153445051303225n
       ];
 
       await mt.delete(4n);
@@ -879,7 +878,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblingsNonExist = [
         0n,
-        4274876798241152869364032215387952876266736406919374878317677138322903129320n
+        90793012380542163121115292742720211788796606421058579751728012408711775415639n
       ];
       await mt.delete(3n);
       let proof = await mt.generateProof(3n, await mt.root());
@@ -888,8 +887,8 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblingsExist = [
         0n,
-        4274876798241152869364032215387952876266736406919374878317677138322903129320n,
-        3968539605503372859924195689353752825000692947459401078008697788408142999740n
+        90793012380542163121115292742720211788796606421058579751728012408711775415639n,
+        58778245672362516760657188918491108074068739632281986516447865413987646804066n
       ];
       await mt.add(3n, 3n);
       proof = await mt.generateProof(3n, await mt.root());
@@ -908,7 +907,7 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblingsNonExist = [
         0n,
-        8485562453225409715331824380162827639878522662998299574537757078697535221073n
+        77032867444825930314963427098772579657571055799776141430952584153445051303225n
       ];
       await mt.delete(8n);
       let proof = await mt.generateProof(8n, await mt.root());
@@ -917,8 +916,8 @@ for (let index = 0; index < storages.length; index++) {
 
       const expectedSiblingsExist = [
         0n,
-        8485562453225409715331824380162827639878522662998299574537757078697535221073n,
-        9054077202653694725190129562729426419405710792276939073869944863201489138082n
+        77032867444825930314963427098772579657571055799776141430952584153445051303225n,
+        75643218886135556618007590826502336434547303617941809863348288103535263487329n
       ];
       await mt.add(8n, 8n);
       proof = await mt.generateProof(8n, await mt.root());
@@ -938,7 +937,7 @@ for (let index = 0; index < storages.length; index++) {
       const proof = await mt.generateProof(15n, await mt.root());
       expect(proof.proof.existence).toEqual(false);
       compareSiblings(
-        [0n, 1243904711429961858774220647610724273798918457991486031567244100767259239747n],
+        [0n, 37245951031790617425846662166414203447230852981947190519491676860679629218468n],
         proof.proof
       );
     });
@@ -955,7 +954,7 @@ for (let index = 0; index < storages.length; index++) {
       const proof = await mt.generateProof(16n, await mt.root());
       expect(proof.proof.existence).toEqual(false);
       compareSiblings(
-        [0n, 849831128489032619062850458217693666094013083866167024127442191257793527951n],
+        [0n, 204679323412988774155807184358931572859960307382228217179160870267303983297n],
         proof.proof
       );
     });
@@ -986,7 +985,7 @@ for (let index = 0; index < storages.length; index++) {
 
       expect(cp.oldRoot.string()).toEqual('0');
       expect(cp.newRoot.string()).toEqual(
-        '13578938674299138072471463694055224830892726234048532520316387704878000008795'
+        '20349940423862035287868699599764962454537984981628200184279725786303353984557'
       );
       expect(cp.oldKey.string()).toEqual('0');
       expect(cp.oldValue.string()).toEqual('0');
@@ -1001,10 +1000,10 @@ for (let index = 0; index < storages.length; index++) {
       cp = await mt.addAndGetCircomProof(BigInt('33'), BigInt('44'));
 
       expect(cp.oldRoot.string()).toEqual(
-        '13578938674299138072471463694055224830892726234048532520316387704878000008795'
+        '20349940423862035287868699599764962454537984981628200184279725786303353984557'
       );
       expect(cp.newRoot.string()).toEqual(
-        '5412393676474193513566895793055462193090331607895808993925969873307089394741'
+        '76534138237239231515859035502772486263463178175980489503663557460094727691106'
       );
       expect(cp.oldKey.string()).toEqual('1');
       expect(cp.oldValue.string()).toEqual('2');
@@ -1019,10 +1018,10 @@ for (let index = 0; index < storages.length; index++) {
       cp = await mt.addAndGetCircomProof(BigInt('55'), BigInt('66'));
 
       expect(cp.oldRoot.string()).toEqual(
-        '5412393676474193513566895793055462193090331607895808993925969873307089394741'
+        '76534138237239231515859035502772486263463178175980489503663557460094727691106'
       );
       expect(cp.newRoot.string()).toEqual(
-        '5094364082618099436543535513148866130251600642297988457797401489780171282025'
+        '100083525042858579469173067236420875189251047437244717808734980864550950841073'
       );
       expect(cp.oldKey.string()).toEqual('0');
       expect(cp.oldValue.string()).toEqual('0');
@@ -1032,7 +1031,7 @@ for (let index = 0; index < storages.length; index++) {
       cp.siblings.forEach((s, idx) => {
         expect(s.string()).toEqual(
           idx === 1
-            ? '21312042436525850949775663177240566532157857119003189090405819719191539342280'
+            ? '100147266556511215860644966030919568737539727316864555910145591818465462834425'
             : '0'
         );
       });
@@ -1054,10 +1053,10 @@ for (let index = 0; index < storages.length; index++) {
 
       const cp = await mt.update(BigInt('10'), BigInt('1024'));
       expect(cp.oldRoot.string()).toEqual(
-        '3901088098157312895771168508102875327412498476307103941861116446804059788045'
+        '70677940031105004292099401697546638864981638318384841379601260831501391203788'
       );
       expect(cp.newRoot.string()).toEqual(
-        '18587862578201383535363956627488622136678432340275446723812600963773389007517'
+        '48796142087158721811528672088219959178352830095639452772749500760280476852932'
       );
       expect(cp.oldKey.string()).toEqual('10');
       expect(cp.oldValue.string()).toEqual('20');
@@ -1065,16 +1064,16 @@ for (let index = 0; index < storages.length; index++) {
       expect(cp.newValue.string()).toEqual('1024');
       expect(cp.isOld0).toEqual(false);
       expect(cp.siblings[0].string()).toEqual(
-        '3493055760199345983787399479799897884337329583575225430469748865784580035592'
+        '45247436445267862009183516361627205881717670673355502280321468321589941650846'
       );
       expect(cp.siblings[1].string()).toEqual(
-        '20201609720365205433999360001442791710365537253733030676534981802168302054263'
+        '76599317612364446295737122728756946145443571773351769593968842498322866493543'
       );
       expect(cp.siblings[2].string()).toEqual(
-        '18790542149740435554763618183910097219145811410462734411095932062387939731734'
+        '106508940255354195227377169991555575191708987078060771291990080645784153376100'
       );
       expect(cp.siblings[3].string()).toEqual(
-        '15930030482599007570177067416534114035267479078907080052418814162004846408322'
+        '99711606839544608379269298367305638623929069793968545743733961006129285845166'
       );
       cp.siblings.slice(4).forEach((s) => {
         expect(s.string()).toEqual('0');
@@ -1085,7 +1084,7 @@ for (let index = 0; index < storages.length; index++) {
       const f = async (node: Node): Promise<void> => {
         return Promise.resolve();
       };
-      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes(''), HashAlgorithm.Keccak256), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
@@ -1095,7 +1094,7 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     it('proof stringify (old format for node aux)', async () => {
-      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes(''), HashAlgorithm.Keccak256), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
@@ -1119,7 +1118,7 @@ for (let index = 0; index < storages.length; index++) {
       expect(JSON.stringify(proof.nodeAux)).toEqual(JSON.stringify(proofFromJSON.nodeAux));
     });
     it('proof stringify (new format for node aux)', async () => {
-      const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
+      const tree = new Merkletree(new InMemoryDB(str2Bytes(''), HashAlgorithm.Keccak256), true, 40);
 
       for (let i = 0; i < 5; i++) {
         await tree.add(BigInt(i), BigInt(i));
@@ -1168,7 +1167,7 @@ for (let index = 0; index < storages.length; index++) {
       let cvp = await mt.generateSCVerifierProof(BigInt('1'), ZERO_HASH);
 
       expect(cvp.root.string()).toEqual(
-        '6525056641794203554583616941316772618766382307684970171204065038799368146416'
+        '82784984500014977958877763851140688264267178109068954640885039848244046400394'
       );
       expect(cvp.siblings.length).toEqual(0);
       expect(cvp.oldKey.string()).toEqual('0');
@@ -1185,14 +1184,14 @@ for (let index = 0; index < storages.length; index++) {
       cvp = await mt.generateCircomVerifierProof(BigInt('2'), ZERO_HASH);
 
       expect(cvp.root.string()).toEqual(
-        '13558168455220559042747853958949063046226645447188878859760119761585093422436'
+        '72673135994199316395211355754392715689773200652773094050830171707225485579516'
       );
       expect(cvp.siblings.length).toEqual(4);
       expect(cvp.siblings[0].string()).toEqual(
-        '11620130507635441932056895853942898236773847390796721536119314875877874016518'
+        '95410369572552625669929443880336035845295666870039053310723367652976210217889'
       );
       expect(cvp.siblings[1].string()).toEqual(
-        '5158240518874928563648144881543092238925265313977134167935552944620041388700'
+        '108591810159780947021882411046895107657640634072271577060276219923125949566920'
       );
       cvp.siblings.slice(3).forEach((s) => {
         expect(s.string()).toEqual('0');
@@ -1215,16 +1214,16 @@ for (let index = 0; index < storages.length; index++) {
 
       const { proof }: { proof: Proof } = await mt.generateProof(BigInt('11'), await mt.root());
 
-      const given = `{ "existence": false, "siblings": [ "0", "12166698708103333637493481507263348370172773813051235807348785759284762677336", "7750564177398573185975752951631372712868228752107043582052272719841058100111", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" ], "node_aux": { "key": "3", "value": "8" }}`;
+      const given = `{ "existence": false, "siblings": [ "0", "30257231137654976416713033869467714092857353299944484231479292418632657921939", "108174256589026683124305912205446370618204099420522125478345491452742619876089", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" ], "node_aux": { "key": "3", "value": "8" }}`;
       const p = Proof.fromJSON(JSON.parse(given));
 
       expect(proof.allSiblings()).toEqual(p.allSiblings());
       expect(proof.nodeAux).toEqual(p.nodeAux);
       expect(proof.existence).toEqual(p.existence);
 
-      let isValid = await verifyProof(await mt.root(), proof, BigInt('11'), BigInt('0'));
+      let isValid = await verifyProof(await mt.root(), proof, BigInt('11'), BigInt('0'), HashAlgorithm.Keccak256);
       expect(isValid).toEqual(true);
-      isValid = await verifyProof(await mt.root(), p, BigInt('11'), BigInt('0'));
+      isValid = await verifyProof(await mt.root(), p, BigInt('11'), BigInt('0'), HashAlgorithm.Keccak256);
       expect(isValid).toEqual(true);
     });
     it('calculate depth for mtp (old format)', async () => {
@@ -1238,16 +1237,16 @@ for (let index = 0; index < storages.length; index++) {
 
       const { proof }: { proof: Proof } = await mt.generateProof(BigInt('11'), await mt.root());
 
-      const given = `{ "existence": false, "siblings": [ "0", "12166698708103333637493481507263348370172773813051235807348785759284762677336", "7750564177398573185975752951631372712868228752107043582052272719841058100111", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" ], "nodeAux": { "key": "3", "value": "8" }}`;
+      const given = `{ "existence": false, "siblings": [ "0", "30257231137654976416713033869467714092857353299944484231479292418632657921939", "108174256589026683124305912205446370618204099420522125478345491452742619876089", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0" ], "nodeAux": { "key": "3", "value": "8" }}`;
       const p = Proof.fromJSON(JSON.parse(given));
 
       expect(proof.allSiblings()).toEqual(p.allSiblings());
       expect(proof.nodeAux).toEqual(p.nodeAux);
       expect(proof.existence).toEqual(p.existence);
 
-      let isValid = await verifyProof(await mt.root(), proof, BigInt('11'), BigInt('0'));
+      let isValid = await verifyProof(await mt.root(), proof, BigInt('11'), BigInt('0'), HashAlgorithm.Keccak256);
       expect(isValid).toEqual(true);
-      isValid = await verifyProof(await mt.root(), p, BigInt('11'), BigInt('0'));
+      isValid = await verifyProof(await mt.root(), p, BigInt('11'), BigInt('0'), HashAlgorithm.Keccak256);
       expect(isValid).toEqual(true);
     });
   });

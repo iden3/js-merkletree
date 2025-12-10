@@ -1,5 +1,5 @@
 import { Node } from './node';
-import { Hash } from '../lib/hash/hash';
+import { Hash, HashAlgorithm } from '../lib/hash/hash';
 import { Bytes } from './bytes';
 
 export interface ITreeStorage {
@@ -7,6 +7,7 @@ export interface ITreeStorage {
   put: (k: Bytes, n: Node) => Promise<void>;
   getRoot: () => Promise<Hash>;
   setRoot: (r: Hash) => Promise<void>;
+  getHashAlgorithm: () => HashAlgorithm;
 }
 
 export type KV = {

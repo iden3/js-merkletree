@@ -1,5 +1,5 @@
 import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH, circomSiblingsFromSiblings } from '../hash/hash';
+import { Hash, ZERO_HASH, circomSiblingsFromSiblings, HashAlgorithm } from '../hash/hash';
 
 import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
@@ -24,11 +24,13 @@ export class Merkletree {
   private _root!: Hash;
   private _writable: boolean;
   private _maxLevel: number;
+  private _algo: HashAlgorithm;
 
   constructor(_db: ITreeStorage, _writable: boolean, _maxLevels: number) {
     this._db = _db;
     this._writable = _writable;
     this._maxLevel = _maxLevels;
+    this._algo = _db.getHashAlgorithm();
   }
 
   async root(): Promise<Hash> {
@@ -51,7 +53,7 @@ export class Merkletree {
     const kHash = Hash.fromBigInt(k);
     const vHash = Hash.fromBigInt(v);
 
-    const newNodeLeaf = new NodeLeaf(kHash, vHash);
+    const newNodeLeaf = new NodeLeaf(kHash, vHash, this._algo);
     const path = getPath(this.maxLevels, kHash.value);
 
     const newRootKey = await this.addLeaf(newNodeLeaf, this._root, 0, path);
@@ -103,7 +105,7 @@ export class Merkletree {
     const hIndex = await e.hIndex();
     const hValue = await e.hValue();
 
-    const newNodeLeaf = new NodeLeaf(hIndex, hValue);
+    const newNodeLeaf = new NodeLeaf(hIndex, hValue, this._algo);
     const path = getPath(this.maxLevels, hIndex.value);
 
     const newRootKey = await this.addLeaf(newNodeLeaf, this._root, 0, path);
@@ -127,9 +129,9 @@ export class Merkletree {
     if (pathNewLeaf[lvl] === pathOldLeaf[lvl]) {
       const nextKey = await this.pushLeaf(newLeaf, oldLeaf, lvl + 1, pathNewLeaf, pathOldLeaf);
       if (pathNewLeaf[lvl]) {
-        newNodeMiddle = new NodeMiddle(new Hash(), nextKey);
+        newNodeMiddle = new NodeMiddle(new Hash(), nextKey, this._algo);
       } else {
-        newNodeMiddle = new NodeMiddle(nextKey, new Hash());
+        newNodeMiddle = new NodeMiddle(nextKey, new Hash(), this._algo);
       }
 
       return await this.addNode(newNodeMiddle);
@@ -139,9 +141,9 @@ export class Merkletree {
     const newLeafKey = await newLeaf.getKey();
 
     if (pathNewLeaf[lvl]) {
-      newNodeMiddle = new NodeMiddle(oldLeafKey, newLeafKey);
+      newNodeMiddle = new NodeMiddle(oldLeafKey, newLeafKey, this._algo);
     } else {
-      newNodeMiddle = new NodeMiddle(newLeafKey, oldLeafKey);
+      newNodeMiddle = new NodeMiddle(newLeafKey, oldLeafKey, this._algo);
     }
 
     await this.addNode(newLeaf);
@@ -178,10 +180,10 @@ export class Merkletree {
 
         if (path[lvl]) {
           const nextKey = await this.addLeaf(newLeaf, (n as NodeMiddle).childR, lvl + 1, path);
-          newNodeMiddle = new NodeMiddle((n as NodeMiddle).childL, nextKey);
+          newNodeMiddle = new NodeMiddle((n as NodeMiddle).childL, nextKey, this._algo);
         } else {
           const nextKey = await this.addLeaf(newLeaf, (n as NodeMiddle).childL, lvl + 1, path);
-          newNodeMiddle = new NodeMiddle(nextKey, (n as NodeMiddle).childR);
+          newNodeMiddle = new NodeMiddle(nextKey, (n as NodeMiddle).childR, this._algo);
         }
 
         return this.addNode(newNodeMiddle);
@@ -283,7 +285,7 @@ export class Merkletree {
           if (bytesEqual(kHash.value, (n as NodeLeaf).entry[0].value)) {
             cp.oldValue = (n as NodeLeaf).entry[1];
             cp.siblings = circomSiblingsFromSiblings([...siblings], this.maxLevels);
-            const newNodeLeaf = new NodeLeaf(kHash, vHash);
+            const newNodeLeaf = new NodeLeaf(kHash, vHash, this._algo);
             await this.updateNode(newNodeLeaf);
 
             const newRootKey = await this.recalculatePathUntilRoot(path, newNodeLeaf, siblings);
@@ -326,9 +328,9 @@ export class Merkletree {
     for (let i = siblings.length - 1; i >= 0; i -= 1) {
       const nodeKey = await node.getKey();
       if (path[i]) {
-        node = new NodeMiddle(siblings[i], nodeKey);
+        node = new NodeMiddle(siblings[i], nodeKey, this._algo);
       } else {
-        node = new NodeMiddle(nodeKey, siblings[i]);
+        node = new NodeMiddle(nodeKey, siblings[i], this._algo);
       }
       await this.addNode(node);
     }
@@ -406,9 +408,9 @@ export class Merkletree {
     if (nearestSibling?.type === NODE_TYPE_MIDDLE) {
       let newNode: Node;
       if (path[siblings.length - 1]) {
-        newNode = new NodeMiddle(toUpload, ZERO_HASH);
+        newNode = new NodeMiddle(toUpload, ZERO_HASH, this._algo);
       } else {
-        newNode = new NodeMiddle(ZERO_HASH, toUpload);
+        newNode = new NodeMiddle(ZERO_HASH, toUpload, this._algo);
       }
       await this.addNode(newNode);
       const newRootKey = await this.recalculatePathUntilRoot(
@@ -425,9 +427,9 @@ export class Merkletree {
       if (!bytesEqual(siblings[i].value, ZERO_HASH.value)) {
         let newNode: Node;
         if (path[i]) {
-          newNode = new NodeMiddle(siblings[i], toUpload);
+          newNode = new NodeMiddle(siblings[i], toUpload, this._algo);
         } else {
-          newNode = new NodeMiddle(toUpload, siblings[i]);
+          newNode = new NodeMiddle(toUpload, siblings[i], this._algo);
         }
         await this.addNode(newNode);
 

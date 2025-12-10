@@ -1,13 +1,13 @@
 // LeafKey computes the key of a leaf node given the hIndex and hValue of the
 // entry of the leaf.
-import { Hash, hashElemsKey } from '../hash/hash';
+import { Hash, HashAlgorithm, hashElemsKey } from '../hash/hash';
 
 import { NODE_VALUE_BYTE_ARR_LENGTH } from '../../constants';
 import { bigIntToUINT8Array } from './bigint';
 import { Bytes, NodeType } from '../../types';
 
-export const leafKey = async (k: Hash, v: Hash): Promise<Hash> => {
-  return hashElemsKey(BigInt(1), [k.bigInt(), v.bigInt()]);
+export const leafKey = async (k: Hash, v: Hash, algo: HashAlgorithm): Promise<Hash> => {
+  return hashElemsKey(BigInt(1), [k.bigInt(), v.bigInt()], algo);
 };
 
 export const nodeValue = (type: NodeType, a: Hash, b: Hash): Bytes => {

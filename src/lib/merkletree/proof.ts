@@ -1,7 +1,7 @@
 import { NodeAux, Siblings } from '../../types/merkletree';
 import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
 import { bytesEqual, getPath, setBitBigEndian, siblings2Bytes, testBitBigEndian } from '../utils';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import { Hash, HashAlgorithm, ZERO_HASH } from '../hash/hash';
 import { NodeMiddle } from '../node/node';
 import { leafKey } from '../utils/node';
 import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
@@ -72,9 +72,9 @@ export class Proof {
       siblings: this.allSiblings().map((s) => s.toJSON()),
       node_aux: this.nodeAux
         ? {
-            key: this.nodeAux.key.toJSON(),
-            value: this.nodeAux.value.toJSON()
-          }
+          key: this.nodeAux.key.toJSON(),
+          value: this.nodeAux.value.toJSON()
+        }
         : undefined
     };
   }
@@ -150,10 +150,11 @@ export const verifyProof = async (
   rootKey: Hash,
   proof: Proof,
   k: bigint,
-  v: bigint
+  v: bigint,
+  algo: HashAlgorithm = HashAlgorithm.Poseidon
 ): Promise<boolean> => {
   try {
-    const rFromProof = await rootFromProof(proof, k, v);
+    const rFromProof = await rootFromProof(proof, k, v, algo);
     return bytesEqual(rootKey.value, rFromProof.value);
   } catch (err) {
     if (err === ErrNodeAuxNonExistAgainstHIndex) {
@@ -163,13 +164,13 @@ export const verifyProof = async (
   }
 };
 
-export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise<Hash> => {
+export const rootFromProof = async (proof: Proof, k: bigint, v: bigint, algo: HashAlgorithm): Promise<Hash> => {
   const kHash = Hash.fromBigInt(k);
   const vHash = Hash.fromBigInt(v);
   let midKey: Hash;
 
   if (proof.existence) {
-    midKey = await leafKey(kHash, vHash);
+    midKey = await leafKey(kHash, vHash, algo);
   } else {
     if (typeof proof.nodeAux === 'undefined') {
       midKey = ZERO_HASH;
@@ -178,7 +179,7 @@ export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise
       if (bytesEqual(kHash.value, nodeAux.key.value)) {
         throw ErrNodeAuxNonExistAgainstHIndex;
       }
-      midKey = await leafKey(nodeAux.key, nodeAux.value);
+      midKey = await leafKey(nodeAux.key, nodeAux.value, algo);
     }
   }
 
@@ -188,9 +189,9 @@ export const rootFromProof = async (proof: Proof, k: bigint, v: bigint): Promise
 
   for (let i = siblings.length - 1; i >= 0; i -= 1) {
     if (path[i]) {
-      midKey = await new NodeMiddle(siblings[i], midKey).getKey();
+      midKey = await new NodeMiddle(siblings[i], midKey, algo).getKey();
     } else {
-      midKey = await new NodeMiddle(midKey, siblings[i]).getKey();
+      midKey = await new NodeMiddle(midKey, siblings[i], algo).getKey();
     }
   }
 
