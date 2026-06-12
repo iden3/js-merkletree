@@ -1,13 +1,8 @@
-import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH, circomSiblingsFromSiblings } from '../hash/hash';
-
-import { Node } from '../../types';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
-import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
-import { bytesEqual, getPath } from '../utils';
-import { NodeAux, Siblings } from '../../types/merkletree';
-import { checkBigIntInField } from '../utils/crypto';
-import { CircomProcessorProof, CircomVerifierProof } from './circom';
+import type { Node } from '../../types';
+import type { NodeAux, Siblings } from '../../types/merkletree';
+import type { ITreeStorage } from '../../types/storage';
+import { checkEntryInField, type Entry } from '../entry';
 import {
   ErrEntryIndexAlreadyExists,
   ErrInvalidNodeFound,
@@ -16,8 +11,12 @@ import {
   ErrNotWritable,
   ErrReachedMaxLevel
 } from '../errors';
+import { circomSiblingsFromSiblings, Hash, ZERO_HASH } from '../hash/hash';
+import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
+import { bytesEqual, getPath } from '../utils';
+import { checkBigIntInField } from '../utils/crypto';
+import { CircomProcessorProof, CircomVerifierProof } from './circom';
 import { Proof } from './proof';
-import { Entry, checkEntryInField } from '../entry';
 
 export class Merkletree {
   private _db: ITreeStorage;
@@ -389,7 +388,7 @@ export class Merkletree {
     throw ErrKeyNotFound;
   }
 
-  async rmAndUpload(path: Array<boolean>, kHash: Hash, siblings: Siblings): Promise<void> {
+  async rmAndUpload(path: Array<boolean>, _kHash: Hash, siblings: Siblings): Promise<void> {
     if (siblings.length === 0) {
       this._root = ZERO_HASH;
       await this._db.setRoot(this._root);
@@ -634,7 +633,7 @@ export class Merkletree {
         case NODE_TYPE_EMPTY:
           break;
         case NODE_TYPE_LEAF:
-          // eslint-disable-next-line no-console
+          // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
           console.log(`"${k.string()}" [style=filled]`);
           break;
         case NODE_TYPE_MIDDLE:
@@ -648,9 +647,9 @@ export class Merkletree {
               cnt += 1;
             }
           });
-          // eslint-disable-next-line no-console
+          // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
           console.log(`"${k.string()}" -> {"${lr[1]}"}`);
-          // eslint-disable-next-line no-console
+          // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
           console.log(emptyNodes);
           break;
         default:
@@ -658,7 +657,7 @@ export class Merkletree {
       }
     });
 
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
     console.log(`}\n`);
   }
 
@@ -666,12 +665,12 @@ export class Merkletree {
     if (bytesEqual(rootKey.value, ZERO_HASH.value)) {
       rootKey = await this.root();
     }
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
     console.log(
       `--------\nGraphViz of the MerkleTree with RootKey ${rootKey.bigInt().toString(10)}\n`
     );
     await this.graphViz(ZERO_HASH);
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole: intentional graphviz debug output
     console.log(
       `End of GraphViz of the MerkleTree with RootKey ${rootKey.bigInt().toString(10)}\n--------\n`
     );

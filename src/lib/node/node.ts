@@ -1,6 +1,3 @@
-import { Bytes, Node, NodeType } from '../../types';
-import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
-
 import {
   EMPTY_NODE_STRING,
   EMPTY_NODE_VALUE,
@@ -8,6 +5,8 @@ import {
   NODE_TYPE_LEAF,
   NODE_TYPE_MIDDLE
 } from '../../constants';
+import type { Bytes, Node, NodeType } from '../../types';
+import { type Hash, hashElems, ZERO_HASH } from '../hash/hash';
 import { leafKey, nodeValue } from '../utils/node';
 
 export class NodeLeaf implements Node {
@@ -69,11 +68,9 @@ export class NodeMiddle implements Node {
 
 export class NodeEmpty implements Node {
   type: NodeType;
-  private _key: Hash;
 
   constructor() {
     this.type = NODE_TYPE_EMPTY;
-    this._key = ZERO_HASH;
   }
 
   async getKey(): Promise<Hash> {

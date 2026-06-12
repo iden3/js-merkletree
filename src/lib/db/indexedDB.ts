@@ -1,10 +1,10 @@
-import { Bytes, Node } from '../../types';
-import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH } from '../hash/hash';
-import { bytes2Hex } from '../utils';
-import { get, set, UseStore, createStore } from 'idb-keyval';
+import { createStore, get, set, type UseStore } from 'idb-keyval';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
+import type { Bytes, Node } from '../../types';
+import type { ITreeStorage } from '../../types/storage';
+import { Hash, ZERO_HASH } from '../hash/hash';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
+import { bytes2Hex } from '../utils';
 
 export class IndexedDBStorage implements ITreeStorage {
   public static readonly storageName = 'merkle-tree';
@@ -14,7 +14,10 @@ export class IndexedDBStorage implements ITreeStorage {
 
   private _currentRoot: Hash;
 
-  constructor(private readonly _prefix: Bytes, databaseName?: string) {
+  constructor(
+    private readonly _prefix: Bytes,
+    databaseName?: string
+  ) {
     this._currentRoot = ZERO_HASH;
     this._prefixHash = bytes2Hex(_prefix);
     this._store = createStore(

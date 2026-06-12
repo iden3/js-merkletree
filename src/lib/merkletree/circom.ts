@@ -1,5 +1,5 @@
-import { ICircomProcessorProof, ICircomVerifierProof, Siblings } from '../../types/merkletree';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import type { ICircomProcessorProof, ICircomVerifierProof, Siblings } from '../../types/merkletree';
+import { type Hash, ZERO_HASH } from '../hash/hash';
 
 export class CircomVerifierProof implements ICircomVerifierProof {
   root: Hash;

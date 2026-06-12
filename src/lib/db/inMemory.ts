@@ -1,8 +1,8 @@
 // in Memory Database implementation
 
-import { Bytes, Node } from '../../types';
-import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH } from '../hash/hash';
+import type { Bytes, Node } from '../../types';
+import type { ITreeStorage } from '../../types/storage';
+import { type Hash, ZERO_HASH } from '../hash/hash';
 
 export class InMemoryDB implements ITreeStorage {
   prefix: Bytes;

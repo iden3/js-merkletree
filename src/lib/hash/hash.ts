@@ -1,14 +1,14 @@
-import { HASH_BYTES_LENGTH } from '../../constants';
-import {
-  bytesEqual,
-  swapEndianness,
-  bytes2Hex,
-  bytes2BinaryString,
-  checkBigIntInField,
-  bigIntToUINT8Array
-} from '../utils';
-import { Bytes, IHash, Siblings } from '../../types';
 import { Hex, poseidon } from '@iden3/js-crypto';
+import { HASH_BYTES_LENGTH } from '../../constants';
+import type { Bytes, IHash, Siblings } from '../../types';
+import {
+  bigIntToUINT8Array,
+  bytes2BinaryString,
+  bytes2Hex,
+  bytesEqual,
+  checkBigIntInField,
+  swapEndianness
+} from '../utils';
 
 export class Hash implements IHash {
   // little endian
@@ -58,7 +58,7 @@ export class Hash implements IHash {
   static fromString(s: string): Hash {
     try {
       return Hash.fromBigInt(BigInt(s));
-    } catch (e) {
+    } catch {
       const deserializedHash = JSON.parse(s);
       const bytes = Uint8Array.from(Object.values(deserializedHash.bytes));
       return new Hash(bytes);

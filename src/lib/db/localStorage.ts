@@ -1,9 +1,7 @@
-/* eslint-disable no-case-declarations */
-
-import { Bytes, Node } from '../../types';
-import { ITreeStorage } from '../../types/storage';
-import { Hash, ZERO_HASH } from '../hash/hash';
 import { NODE_TYPE_EMPTY, NODE_TYPE_LEAF, NODE_TYPE_MIDDLE } from '../../constants';
+import type { Bytes, Node } from '../../types';
+import type { ITreeStorage } from '../../types/storage';
+import { Hash, ZERO_HASH } from '../hash/hash';
 import { NodeEmpty, NodeLeaf, NodeMiddle } from '../node/node';
 import { bytes2Hex } from '../utils';
 
@@ -34,16 +32,18 @@ export class LocalStorageDB implements ITreeStorage {
     switch (obj.type) {
       case NODE_TYPE_EMPTY:
         return new NodeEmpty();
-      case NODE_TYPE_MIDDLE:
+      case NODE_TYPE_MIDDLE: {
         const cL = new Hash(Uint8Array.from(obj.childL));
         const cR = new Hash(Uint8Array.from(obj.childR));
 
         return new NodeMiddle(cL, cR);
-      case NODE_TYPE_LEAF:
+      }
+      case NODE_TYPE_LEAF: {
         const k = new Hash(Uint8Array.from(obj.entry[0]));
         const v = new Hash(Uint8Array.from(obj.entry[1]));
 
         return new NodeLeaf(k, v);
+      }
     }
 
     throw `error: value found for key ${bytes2Hex(kBytes)} is not of type Node`;

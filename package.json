@@ -51,34 +51,32 @@
     "build:esm": "tsc --outDir dist/node/esm  --declaration --declarationDir dist/types",
     "build:browser": "rollup -c scripts/browser.mjs",
     "clean": "rimraf ./dist",
-    "test": "vitest run --globals",
-    "lint": "eslint --fix",
-    "lint:check": "eslint",
-    "format": "prettier --config .prettierrc './{src,tests}/*.ts' --write",
-    "format:check": "prettier --config .prettierrc './{src,tests}/*.ts' --check",
-    "deps:check": "madge --warning --circular --extensions ts ./"
+    "test": "vitest run",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "lint": "biome ci . && cspell \"**/*.{ts,js,mjs}\" --no-progress"
   },
   "devDependencies": {
-    "@iden3/eslint-config": "https://github.com/iden3/eslint-config",
-    "@types/node": "^22.15.19",
-    "mock-local-storage": "^1.1.23",
-    "fake-indexeddb": "^6.0.1",
-    "@cspell/eslint-plugin": "^8.14.2",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
-    "@types/jest": "^29.5.14",
-    "esbuild": "^0.25.4",
-    "madge": "^8.0.0",
-    "rimraf": "^6.0.1",
-    "rollup": "^4.41.0",
-    "ts-node": "^10.9.2",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
+    "@iden3/biome-config": "https://github.com/iden3/eslint-config#biome-config",
+    "@rollup/plugin-commonjs": "29.0.3",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-typescript": "12.3.0",
+    "@types/node": "25.9.3",
+    "@vitest/browser": "4.1.8",
+    "@vitest/browser-playwright": "4.1.8",
+    "esbuild": "0.28.1",
+    "fake-indexeddb": "6.2.5",
+    "mock-local-storage": "1.1.24",
+    "playwright": "1.60.0",
+    "rimraf": "6.1.3",
+    "rollup": "4.61.1",
+    "ts-node": "10.9.2",
+    "tslib": "2.8.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
   },
   "peerDependencies": {
-    "@iden3/js-crypto": "1.3.2",
-    "idb-keyval": "6.2.2"
+    "@iden3/js-crypto": "1.3.3",
+    "idb-keyval": "6.2.5"
   }
 }
