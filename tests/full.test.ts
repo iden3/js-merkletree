@@ -1,5 +1,6 @@
 import { poseidon } from '@iden3/js-crypto';
 import { clear, createStore, type UseStore } from 'idb-keyval';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD, NODE_TYPE_LEAF } from '../src/constants';
 import { IndexedDBStorage, InMemoryDB, LocalStorageDB } from '../src/lib/db';
 import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
@@ -11,7 +12,6 @@ import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib
 import 'mock-local-storage';
 import 'fake-indexeddb/auto';
 import type { Node } from '../src/types';
-import { describe, beforeEach, it, expect } from 'vitest';
 
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
