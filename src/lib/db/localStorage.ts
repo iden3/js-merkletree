@@ -46,7 +46,7 @@ export class LocalStorageDB implements ITreeStorage {
       }
     }
 
-    throw `error: value found for key ${bytes2Hex(kBytes)} is not of type Node`;
+    throw new Error(`error: value found for key ${bytes2Hex(kBytes)} is not of type Node`);
   }
 
   async put(k: Bytes, n: Node): Promise<void> {
