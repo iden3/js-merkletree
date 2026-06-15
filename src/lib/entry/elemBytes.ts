@@ -1,5 +1,5 @@
 import { ELEM_BYTES_LEN } from '../../constants';
-import { Bytes } from '../../types';
+import type { Bytes } from '../../types';
 import { bytes2Hex, newBigIntFromBytes, swapEndianness } from '../utils';
 
 export class ElemBytes {

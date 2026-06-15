@@ -1,8 +1,8 @@
 import { Data } from '../entry/data';
-import { Hash, ZERO_HASH, hashElems } from '../hash/hash';
+import { type Hash, hashElems, ZERO_HASH } from '../hash/hash';
 import { checkBigIntInField } from '../utils';
 
-import { ElemBytes } from './elemBytes';
+import type { ElemBytes } from './elemBytes';
 
 export class Entry {
   private _data: Data;

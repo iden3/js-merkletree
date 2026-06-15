@@ -1,12 +1,12 @@
 import { HASH_BYTES_LENGTH } from '../../constants';
-import { Bytes } from '../../types';
+import type { Bytes } from '../../types';
 
 export const bigint2Array = (bigNum: bigint, radix?: number): Array<number> => {
   return bigNum
     .toString(radix ? radix : 10)
     .split('')
     .map((n) => {
-      return parseInt(n);
+      return parseInt(n, 10);
     });
 };
 

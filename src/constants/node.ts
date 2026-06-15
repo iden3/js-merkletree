@@ -1,5 +1,5 @@
 // middle node.ts with children
-import { NodeType } from '../types';
+import type { NodeType } from '../types';
 
 export const NODE_TYPE_MIDDLE: NodeType = 0;
 // Leaf node.ts with a key and a value

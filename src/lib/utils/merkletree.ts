@@ -1,7 +1,7 @@
 // const siblingBytes = bs.slice(this.notEmpties.length + PROOF_FLAG_LEN);
 import { HASH_BYTES_LENGTH } from '../../constants';
-import { Bytes } from '../../types';
-import { Path, Siblings } from '../../types/merkletree';
+import type { Bytes } from '../../types';
+import type { Path, Siblings } from '../../types/merkletree';
 import { testBit } from './bytes';
 
 export const getPath = (numLevels: number, k: Bytes): Path => {

@@ -1,11 +1,11 @@
-import { NodeAux, Siblings } from '../../types/merkletree';
 import { ELEM_BYTES_LEN, NOT_EMPTIES_LEN, PROOF_FLAG_LEN } from '../../constants';
-import { bytesEqual, getPath, setBitBigEndian, siblings2Bytes, testBitBigEndian } from '../utils';
+import type { Bytes } from '../../types';
+import type { NodeAux, Siblings } from '../../types/merkletree';
+import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
 import { Hash, ZERO_HASH } from '../hash/hash';
 import { NodeMiddle } from '../node/node';
+import { bytesEqual, getPath, setBitBigEndian, siblings2Bytes, testBitBigEndian } from '../utils';
 import { leafKey } from '../utils/node';
-import { ErrNodeAuxNonExistAgainstHIndex } from '../errors/proof';
-import { Bytes } from '../../types';
 
 export interface ProofJSON {
   existence: boolean;
@@ -98,7 +98,7 @@ export class Proof {
   }
 
   public static fromJSON(obj: ProofJSON): Proof {
-    let nodeAux: NodeAux | undefined = undefined;
+    let nodeAux: NodeAux | undefined;
     const nodeAuxJson: NodeAuxJSON | undefined = obj.node_aux ?? obj.nodeAux; // we keep backward compatibility and support both representations
     if (nodeAuxJson) {
       nodeAux = {
@@ -141,7 +141,6 @@ export class Proof {
  * @deprecated The method should not be used and will be removed in the next major version,
  * please use proof.allSiblings instead
  */
-// eslint-disable-next-line @cspell/spellchecker
 export const siblignsFroomProof = (proof: Proof): Siblings => {
   return proof.allSiblings();
 };

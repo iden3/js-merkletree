@@ -1,4 +1,4 @@
-import { Hash } from '../lib/hash/hash';
+import type { Hash } from '../lib/hash/hash';
 
 export type Path = Array<boolean>;
 export type Siblings = Array<Hash>;

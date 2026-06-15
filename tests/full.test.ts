@@ -1,16 +1,17 @@
-import { UseStore, createStore, clear } from 'idb-keyval';
-import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD, NODE_TYPE_LEAF } from '../src/constants';
-import { NodeLeaf, NodeMiddle } from '../src/lib/node/node';
-import { InMemoryDB, LocalStorageDB, IndexedDBStorage } from '../src/lib/db';
-import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
-import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
-import { Merkletree, Proof, ProofJSON, verifyProof } from '../src/lib/merkletree';
-import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
 import { poseidon } from '@iden3/js-crypto';
+import { clear, createStore, type UseStore } from 'idb-keyval';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { HASH_BYTES_LENGTH, MAX_NUM_IN_FIELD, NODE_TYPE_LEAF } from '../src/constants';
+import { IndexedDBStorage, InMemoryDB, LocalStorageDB } from '../src/lib/db';
+import { ErrEntryIndexAlreadyExists, ErrKeyNotFound, ErrReachedMaxLevel } from '../src/lib/errors';
+import { Hash, ZERO_HASH } from '../src/lib/hash/hash';
+import { Merkletree, Proof, type ProofJSON, verifyProof } from '../src/lib/merkletree';
+import { type NodeLeaf, NodeMiddle } from '../src/lib/node/node';
+import { bigIntToUINT8Array, bytes2Hex, bytesEqual, str2Bytes } from '../src/lib/utils';
 
 import 'mock-local-storage';
 import 'fake-indexeddb/auto';
-import { Node } from '../src/types';
+import type { Node } from '../src/types';
 
 enum TreeStorageType {
   LocalStorageDB = 'localStorage',
@@ -37,11 +38,11 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     const getTreeStorage = (prefix = '') => {
-      if (storages[index] == TreeStorageType.LocalStorageDB) {
+      if (storages[index] === TreeStorageType.LocalStorageDB) {
         return new LocalStorageDB(str2Bytes(prefix));
-      } else if (storages[index] == TreeStorageType.IndexedDB) {
+      } else if (storages[index] === TreeStorageType.IndexedDB) {
         return new IndexedDBStorage(str2Bytes(prefix));
-      } else if (storages[index] == TreeStorageType.InMemoryDB) {
+      } else if (storages[index] === TreeStorageType.InMemoryDB) {
         return new InMemoryDB(str2Bytes(prefix));
       }
       throw new Error('error: unknown storage type');
@@ -964,7 +965,7 @@ for (let index = 0; index < storages.length; index++) {
       const sto1 = getTreeStorage('tree1');
       const sto2 = getTreeStorage('tree2');
       const mt1 = new Merkletree(sto1, true, 140);
-      const mt2 = new Merkletree(sto2, true, 140);
+      const _mt2 = new Merkletree(sto2, true, 140);
 
       for (let i = 0; i < 10; i += 1) {
         let k = MAX_NUM_IN_FIELD - BigInt(i.toString());
@@ -1082,7 +1083,7 @@ for (let index = 0; index < storages.length; index++) {
     });
 
     it('expect tree.walk does not produce infinite loop', async () => {
-      const f = async (node: Node): Promise<void> => {
+      const f = async (_node: Node): Promise<void> => {
         return Promise.resolve();
       };
       const tree = new Merkletree(new InMemoryDB(str2Bytes('')), true, 40);
@@ -1101,7 +1102,7 @@ for (let index = 0; index < storages.length; index++) {
         await tree.add(BigInt(i), BigInt(i));
       }
 
-      const { proof, value } = await tree.generateProof(BigInt(9));
+      const { proof } = await tree.generateProof(BigInt(9));
 
       const proofModel = JSON.stringify(proof);
       const p = JSON.parse(proofModel) as ProofJSON;
@@ -1125,7 +1126,7 @@ for (let index = 0; index < storages.length; index++) {
         await tree.add(BigInt(i), BigInt(i));
       }
 
-      const { proof, value } = await tree.generateProof(BigInt(9));
+      const { proof } = await tree.generateProof(BigInt(9));
 
       const proofModel = JSON.stringify(proof);
 

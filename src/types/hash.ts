@@ -1,5 +1,5 @@
-import { Hash } from '../lib/hash/hash';
-import { Bytes } from './bytes';
+import type { Hash } from '../lib/hash/hash';
+import type { Bytes } from './bytes';
 
 export interface IHash {
   value: Bytes;
