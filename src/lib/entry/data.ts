@@ -47,11 +47,11 @@ export const newDataFromBytes = (bytes: Bytes): Data => {
     throw `expected bytes length to be ${DATA_LEN_BYTES}, got ${bytes.length}`;
   }
   const d = new Data();
-  const arr = new Array<ElemBytes>(DATA_LEN_BYTES);
+  const arr = new Array<ElemBytes>(DATA_LEN);
 
   for (let i = 0; i < DATA_LEN; i += 1) {
     const tmp = new ElemBytes();
-    tmp.value = bytes.slice(i * ELEM_BYTES_LEN, (i + 1) * DATA_LEN_BYTES);
+    tmp.value = bytes.slice(i * ELEM_BYTES_LEN, (i + 1) * ELEM_BYTES_LEN);
     arr[i] = tmp;
   }
 
